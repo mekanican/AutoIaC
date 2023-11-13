@@ -1,0 +1,86 @@
+digraph tm {
+    graph [
+        fontname = Arial;
+        fontsize = 14;
+    ]
+    node [
+        fontname = Arial;
+        fontsize = 14;
+        rankdir = lr;
+    ]
+    edge [
+        shape = none;
+        arrowtail = onormal;
+        fontname = Arial;
+        fontsize = 12;
+    ]
+    labelloc = "t";
+    fontsize = 20;
+    nodesep = 1;
+
+    subgraph cluster_boundary_modulerootmodulenetworkawsvpckmvpc_acf3059e70 {
+        graph [
+            fontsize = 10;
+            fontcolor = firebrick2;
+            style = dashed;
+            color = firebrick2;
+            label = <<i>module.root.module\n.network.aws_vpc.k\nm_vpc</i>>;
+        ]
+
+        subgraph cluster_boundary_Public_88f2d9c06f {
+            graph [
+                fontsize = 10;
+                fontcolor = firebrick2;
+                style = dashed;
+                color = firebrick2;
+                label = <<i>Public</i>>;
+            ]
+
+            server_modulerootmodulenetworkawslbkmlb_f2eb7a3ff7 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "module.root.module\n.network.aws_lb.km\n_lb";
+                margin = 0.02;
+            ]
+
+            server_modulerootmodulecomputeawsinstancekmvm_d2006ce1bb [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "module.root.module\n.compute.aws_insta\nnce.km_vm";
+                margin = 0.02;
+            ]
+
+        }
+
+        subgraph cluster_boundary_Private_579e9aae81 {
+            graph [
+                fontsize = 10;
+                fontcolor = firebrick2;
+                style = dashed;
+                color = firebrick2;
+                label = <<i>Private</i>>;
+            ]
+
+            server_modulerootmodulecomputeawsecsservicekmecsservice_f8af758679 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "module.root.module\n.compute.aws_ecs_s\nervice.km_ecs_serv\nice";
+                margin = 0.02;
+            ]
+
+            server_modulerootmodulestorageawsdbsubnetgroupkmrdssubnetgrp_2c440ebe53 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "module.root.module\n.storage.aws_db_su\nbnet_group.km_rds_\nsubnet_grp";
+                margin = 0.02;
+            ]
+
+        }
+
+    }
+
+}

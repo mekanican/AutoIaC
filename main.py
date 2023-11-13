@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import fire
 import json
+from pytm.pytm import TM, Server, Boundary
 
 jsonData = {}
 nodeMap = {}
@@ -134,8 +135,21 @@ def main(in_path, out_path="./output"):
     jsonData = json.load(open(in_path, "r"))
     nodeMap = create_node_map()
     vpcs = filter_vpc()
+
+    tm = TM("AWS Threat Model")
+    tm.isOrdered = True
+
     for vpc in vpcs:
         print("Working on VPC:", vpc["data"]["id"])
+        
+        # VPC Consist of public & private
+        # Private & public consist of resources in subnets
+        vpcBound = Boundary(vpc["data"]["id"])
+        publicBound = Boundary("Public")
+        publicBound.inBoundary = vpcBound
+        privateBound = Boundary("Private")
+        privateBound.inBoundary = vpcBound
+
         pub, priv = find_subnets(vpc)
         print("List of public subnet:")
         for sub in pub:
@@ -143,6 +157,9 @@ def main(in_path, out_path="./output"):
             refResources = find_resource_in_subnet(sub)
             for ref in refResources:
                 print("-", ref["data"]["id"])
+                # Temporary, TODO: classify resource -> correct TM element
+                server = Server(ref["data"]["id"])
+                server.inBoundary = publicBound
             
         print("List of private subnet:")
         for sub in priv:
@@ -150,8 +167,15 @@ def main(in_path, out_path="./output"):
             refResources = find_resource_in_subnet(sub)
             for ref in refResources:
                 print("-", ref["data"]["id"])
+                server = Server(ref["data"]["id"])
+                server.inBoundary = privateBound
             
         print("------------------------")
+    print("Extracting Dotfile to output")
+    
+    with open(out_path + "/output.dot", "w") as f:
+        f.write(tm.dfd())
+    
 
 if __name__ == '__main__':
     fire.Fire(main)
