@@ -84,6 +84,46 @@ def find_subnets(vpc):
                 subnets.append(source)
     return identify_subnet(subnets)
 
+def find_resource_in_subnet(subnet):
+    subnetId = subnet["data"]["id"]
+
+    resources = []
+    
+    # Case 1: Resource connect directly to subnet
+    for elem in jsonData["edges"]:
+        if elem["data"]["target"] == subnetId and elem["data"]["sourceType"] == "resource":
+            source = nodeMap[elem["data"]["source"]]
+            # Ignore the aws_nat_gateway & aws_route_table_association
+            if source["data"]["label"].startswith("aws_nat_gateway.") or \
+                source["data"]["label"].startswith("aws_route_table_association"):
+                    continue
+            resources.append(source)
+            
+    # Case 2: subnet -> output -> variable -> resource
+    # Find outputs
+    outputs = []
+    for elem in jsonData["edges"]:
+        if elem["data"]["target"] == subnetId and elem["data"]["sourceType"] == "output":
+            source = nodeMap[elem["data"]["source"]]
+            outputs.append(source)
+    # Find referenced variables
+    vars = []
+    for output in outputs:
+        outputId = output["data"]["id"]
+        for elem in jsonData["edges"]:
+            source = nodeMap[elem["data"]["source"]]
+            if elem["data"]["target"] == outputId and elem["data"]["sourceType"] == "var":
+                vars.append(source)
+    # Find referenced resources
+    for var in vars:
+        varId = var["data"]["id"]
+        for elem in jsonData["edges"]:
+            source = nodeMap[elem["data"]["source"]]
+            if elem["data"]["target"] == varId and elem["data"]["sourceType"] == "resource":
+                resources.append(source)
+
+    # TODO: handle special case (graph traversal to accessing all resources)
+    return resources
 
 
 def main(in_path, out_path="./output"):
@@ -100,10 +140,16 @@ def main(in_path, out_path="./output"):
         print("List of public subnet:")
         for sub in pub:
             print(sub["data"]["id"])
+            refResources = find_resource_in_subnet(sub)
+            for ref in refResources:
+                print("-", ref["data"]["id"])
             
         print("List of private subnet:")
         for sub in priv:
             print(sub["data"]["id"])
+            refResources = find_resource_in_subnet(sub)
+            for ref in refResources:
+                print("-", ref["data"]["id"])
             
         print("------------------------")
 
