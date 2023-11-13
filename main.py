@@ -76,7 +76,6 @@ Sample Edge format
 def find_subnets(vpc):
     subnets = []
     # Find all aws_subnet that use info of this vpc
-    # and aws_nat_gateway
     vpcId = vpc["data"]["id"]
     for elem in jsonData["edges"]:
         if elem["data"]["target"] == vpcId:
@@ -96,15 +95,15 @@ def main(in_path, out_path="./output"):
     nodeMap = create_node_map()
     vpcs = filter_vpc()
     for vpc in vpcs:
-        print("Working on VPC:", vpc["data"]["label"])
+        print("Working on VPC:", vpc["data"]["id"])
         pub, priv = find_subnets(vpc)
         print("List of public subnet:")
         for sub in pub:
-            print(sub["data"]["label"])
+            print(sub["data"]["id"])
             
         print("List of private subnet:")
         for sub in priv:
-            print(sub["data"]["label"])
+            print(sub["data"]["id"])
             
         print("------------------------")
 

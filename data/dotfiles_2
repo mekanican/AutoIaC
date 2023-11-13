@@ -1,0 +1,147 @@
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_cloudwatch_log_group.cloudwatch_log_group (expand)" [label = "aws_cloudwatch_log_group.cloudwatch_log_group", shape = "box"]
+		"[root] aws_eip.nat (expand)" [label = "aws_eip.nat", shape = "box"]
+		"[root] aws_iam_instance_profile.KafkaClientIAM_Profile (expand)" [label = "aws_iam_instance_profile.KafkaClientIAM_Profile", shape = "box"]
+		"[root] aws_iam_role.KafkaClientIAM_Role (expand)" [label = "aws_iam_role.KafkaClientIAM_Role", shape = "box"]
+		"[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att1 (expand)" [label = "aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att1", shape = "box"]
+		"[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att2 (expand)" [label = "aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att2", shape = "box"]
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" [label = "aws_instance.Kafka-Client-EC2-Instance", shape = "box"]
+		"[root] aws_internet_gateway.main-igw (expand)" [label = "aws_internet_gateway.main-igw", shape = "box"]
+		"[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)" [label = "aws_key_pair.MSK-Keypair-ec2-keypair", shape = "box"]
+		"[root] aws_kms_alias.msk-kms-alias (expand)" [label = "aws_kms_alias.msk-kms-alias", shape = "box"]
+		"[root] aws_kms_alias.pca-kims-alias (expand)" [label = "aws_kms_alias.pca-kims-alias", shape = "box"]
+		"[root] aws_kms_key.msk-kms-key (expand)" [label = "aws_kms_key.msk-kms-key", shape = "box"]
+		"[root] aws_kms_key.pca-kms (expand)" [label = "aws_kms_key.pca-kms", shape = "box"]
+		"[root] aws_msk_cluster.msk_cluster (expand)" [label = "aws_msk_cluster.msk_cluster", shape = "box"]
+		"[root] aws_msk_configuration.msk_cluster_config (expand)" [label = "aws_msk_configuration.msk_cluster_config", shape = "box"]
+		"[root] aws_nat_gateway.main-natgw (expand)" [label = "aws_nat_gateway.main-natgw", shape = "box"]
+		"[root] aws_route_table.PrivateRouteTable (expand)" [label = "aws_route_table.PrivateRouteTable", shape = "box"]
+		"[root] aws_route_table.PublicRouteTable (expand)" [label = "aws_route_table.PublicRouteTable", shape = "box"]
+		"[root] aws_route_table_association.route_Privatesubnet (expand)" [label = "aws_route_table_association.route_Privatesubnet", shape = "box"]
+		"[root] aws_route_table_association.route_Publicsubnet (expand)" [label = "aws_route_table_association.route_Publicsubnet", shape = "box"]
+		"[root] aws_security_group.KafkaClientInstanceSG (expand)" [label = "aws_security_group.KafkaClientInstanceSG", shape = "box"]
+		"[root] aws_security_group.KafkaClusterSG (expand)" [label = "aws_security_group.KafkaClusterSG", shape = "box"]
+		"[root] aws_subnet.private_subnet (expand)" [label = "aws_subnet.private_subnet", shape = "box"]
+		"[root] aws_subnet.public_subnet (expand)" [label = "aws_subnet.public_subnet", shape = "box"]
+		"[root] aws_vpc.msk_vpc (expand)" [label = "aws_vpc.msk_vpc", shape = "box"]
+		"[root] data.aws_availability_zones.available (expand)" [label = "data.aws_availability_zones.available", shape = "box"]
+		"[root] data.aws_caller_identity.current (expand)" [label = "data.aws_caller_identity.current", shape = "box"]
+		"[root] data.local_file.msk-keypair-public (expand)" [label = "data.local_file.msk-keypair-public", shape = "box"]
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"]" [label = "provider[\"registry.opentofu.org/hashicorp/aws\"]", shape = "diamond"]
+		"[root] provider[\"registry.opentofu.org/hashicorp/local\"]" [label = "provider[\"registry.opentofu.org/hashicorp/local\"]", shape = "diamond"]
+		"[root] provider[\"registry.opentofu.org/hashicorp/random\"]" [label = "provider[\"registry.opentofu.org/hashicorp/random\"]", shape = "diamond"]
+		"[root] random_id.kms (expand)" [label = "random_id.kms", shape = "box"]
+		"[root] random_uuid.randuuid (expand)" [label = "random_uuid.randuuid", shape = "box"]
+		"[root] var.application" [label = "var.application", shape = "note"]
+		"[root] var.aws-profile" [label = "var.aws-profile", shape = "note"]
+		"[root] var.aws_region" [label = "var.aws_region", shape = "note"]
+		"[root] var.broker_nodes" [label = "var.broker_nodes", shape = "note"]
+		"[root] var.encryption_type" [label = "var.encryption_type", shape = "note"]
+		"[root] var.environment" [label = "var.environment", shape = "note"]
+		"[root] var.key_name" [label = "var.key_name", shape = "note"]
+		"[root] var.monitoring_type" [label = "var.monitoring_type", shape = "note"]
+		"[root] var.msk_ami" [label = "var.msk_ami", shape = "note"]
+		"[root] var.msk_cluster_instance_type" [label = "var.msk_cluster_instance_type", shape = "note"]
+		"[root] var.msk_cluster_version" [label = "var.msk_cluster_version", shape = "note"]
+		"[root] var.msk_ebs_volume_size" [label = "var.msk_ebs_volume_size", shape = "note"]
+		"[root] var.msk_instance_type" [label = "var.msk_instance_type", shape = "note"]
+		"[root] var.private_subnet_cidrs" [label = "var.private_subnet_cidrs", shape = "note"]
+		"[root] var.public_subnet_cidrs" [label = "var.public_subnet_cidrs", shape = "note"]
+		"[root] var.vpc_cidr" [label = "var.vpc_cidr", shape = "note"]
+		"[root] aws_cloudwatch_log_group.cloudwatch_log_group (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_cloudwatch_log_group.cloudwatch_log_group (expand)" -> "[root] random_uuid.randuuid (expand)"
+		"[root] aws_eip.nat (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_iam_instance_profile.KafkaClientIAM_Profile (expand)" -> "[root] aws_iam_role.KafkaClientIAM_Role (expand)"
+		"[root] aws_iam_role.KafkaClientIAM_Role (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att1 (expand)" -> "[root] aws_iam_role.KafkaClientIAM_Role (expand)"
+		"[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att2 (expand)" -> "[root] aws_iam_role.KafkaClientIAM_Role (expand)"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] aws_iam_instance_profile.KafkaClientIAM_Profile (expand)"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] aws_kms_key.msk-kms-key (expand)"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] aws_security_group.KafkaClientInstanceSG (expand)"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] aws_subnet.private_subnet (expand)"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] var.key_name"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] var.msk_ami"
+		"[root] aws_instance.Kafka-Client-EC2-Instance (expand)" -> "[root] var.msk_instance_type"
+		"[root] aws_internet_gateway.main-igw (expand)" -> "[root] aws_vpc.msk_vpc (expand)"
+		"[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)" -> "[root] data.local_file.msk-keypair-public (expand)"
+		"[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)" -> "[root] var.key_name"
+		"[root] aws_kms_alias.msk-kms-alias (expand)" -> "[root] aws_kms_key.msk-kms-key (expand)"
+		"[root] aws_kms_alias.msk-kms-alias (expand)" -> "[root] random_id.kms (expand)"
+		"[root] aws_kms_alias.pca-kims-alias (expand)" -> "[root] aws_kms_key.pca-kms (expand)"
+		"[root] aws_kms_key.msk-kms-key (expand)" -> "[root] data.aws_caller_identity.current (expand)"
+		"[root] aws_kms_key.pca-kms (expand)" -> "[root] data.aws_caller_identity.current (expand)"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] aws_cloudwatch_log_group.cloudwatch_log_group (expand)"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] aws_msk_configuration.msk_cluster_config (expand)"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] aws_security_group.KafkaClusterSG (expand)"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] aws_subnet.private_subnet (expand)"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] var.broker_nodes"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] var.encryption_type"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] var.monitoring_type"
+		"[root] aws_msk_cluster.msk_cluster (expand)" -> "[root] var.msk_cluster_instance_type"
+		"[root] aws_msk_configuration.msk_cluster_config (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_msk_configuration.msk_cluster_config (expand)" -> "[root] random_uuid.randuuid (expand)"
+		"[root] aws_msk_configuration.msk_cluster_config (expand)" -> "[root] var.environment"
+		"[root] aws_msk_configuration.msk_cluster_config (expand)" -> "[root] var.msk_cluster_version"
+		"[root] aws_nat_gateway.main-natgw (expand)" -> "[root] aws_eip.nat (expand)"
+		"[root] aws_nat_gateway.main-natgw (expand)" -> "[root] aws_subnet.public_subnet (expand)"
+		"[root] aws_route_table.PrivateRouteTable (expand)" -> "[root] aws_nat_gateway.main-natgw (expand)"
+		"[root] aws_route_table.PublicRouteTable (expand)" -> "[root] aws_internet_gateway.main-igw (expand)"
+		"[root] aws_route_table_association.route_Privatesubnet (expand)" -> "[root] aws_route_table.PrivateRouteTable (expand)"
+		"[root] aws_route_table_association.route_Privatesubnet (expand)" -> "[root] aws_subnet.private_subnet (expand)"
+		"[root] aws_route_table_association.route_Publicsubnet (expand)" -> "[root] aws_route_table.PublicRouteTable (expand)"
+		"[root] aws_route_table_association.route_Publicsubnet (expand)" -> "[root] aws_subnet.public_subnet (expand)"
+		"[root] aws_security_group.KafkaClientInstanceSG (expand)" -> "[root] aws_vpc.msk_vpc (expand)"
+		"[root] aws_security_group.KafkaClusterSG (expand)" -> "[root] aws_vpc.msk_vpc (expand)"
+		"[root] aws_security_group.KafkaClusterSG (expand)" -> "[root] random_uuid.randuuid (expand)"
+		"[root] aws_subnet.private_subnet (expand)" -> "[root] aws_vpc.msk_vpc (expand)"
+		"[root] aws_subnet.private_subnet (expand)" -> "[root] data.aws_availability_zones.available (expand)"
+		"[root] aws_subnet.private_subnet (expand)" -> "[root] var.private_subnet_cidrs"
+		"[root] aws_subnet.public_subnet (expand)" -> "[root] aws_vpc.msk_vpc (expand)"
+		"[root] aws_subnet.public_subnet (expand)" -> "[root] data.aws_availability_zones.available (expand)"
+		"[root] aws_subnet.public_subnet (expand)" -> "[root] var.public_subnet_cidrs"
+		"[root] aws_vpc.msk_vpc (expand)" -> "[root] local.common-tags (expand)"
+		"[root] aws_vpc.msk_vpc (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] aws_vpc.msk_vpc (expand)" -> "[root] var.vpc_cidr"
+		"[root] data.aws_availability_zones.available (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] data.aws_caller_identity.current (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"]"
+		"[root] data.local_file.msk-keypair-public (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/local\"]"
+		"[root] local.common-tags (expand)" -> "[root] var.application"
+		"[root] local.common-tags (expand)" -> "[root] var.aws-profile"
+		"[root] local.common-tags (expand)" -> "[root] var.environment"
+		"[root] output.IP (expand)" -> "[root] aws_instance.Kafka-Client-EC2-Instance (expand)"
+		"[root] output.bootstrap_brokers (expand)" -> "[root] aws_msk_cluster.msk_cluster (expand)"
+		"[root] output.bootstrap_brokers_tls (expand)" -> "[root] aws_msk_cluster.msk_cluster (expand)"
+		"[root] output.msk-user-keypair (expand)" -> "[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)"
+		"[root] output.zookeeper_connect_string (expand)" -> "[root] aws_msk_cluster.msk_cluster (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att1 (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_iam_role_policy_attachment.Kafka-Client-IAM-role-att2 (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_instance.Kafka-Client-EC2-Instance (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_key_pair.MSK-Keypair-ec2-keypair (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_kms_alias.msk-kms-alias (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_kms_alias.pca-kims-alias (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_msk_cluster.msk_cluster (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.route_Privatesubnet (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.route_Publicsubnet (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"]" -> "[root] var.aws-profile"
+		"[root] provider[\"registry.opentofu.org/hashicorp/aws\"]" -> "[root] var.aws_region"
+		"[root] provider[\"registry.opentofu.org/hashicorp/local\"] (close)" -> "[root] data.local_file.msk-keypair-public (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/random\"] (close)" -> "[root] random_id.kms (expand)"
+		"[root] provider[\"registry.opentofu.org/hashicorp/random\"] (close)" -> "[root] random_uuid.randuuid (expand)"
+		"[root] random_id.kms (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/random\"]"
+		"[root] random_uuid.randuuid (expand)" -> "[root] provider[\"registry.opentofu.org/hashicorp/random\"]"
+		"[root] root" -> "[root] output.IP (expand)"
+		"[root] root" -> "[root] output.bootstrap_brokers (expand)"
+		"[root] root" -> "[root] output.bootstrap_brokers_tls (expand)"
+		"[root] root" -> "[root] output.msk-user-keypair (expand)"
+		"[root] root" -> "[root] output.zookeeper_connect_string (expand)"
+		"[root] root" -> "[root] provider[\"registry.opentofu.org/hashicorp/aws\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.opentofu.org/hashicorp/local\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.opentofu.org/hashicorp/random\"] (close)"
+		"[root] root" -> "[root] var.msk_ebs_volume_size"
+	}
+}
+
