@@ -2,174 +2,87 @@
 import fire
 import json
 from pytm.pytm import TM, Server, Boundary
+from parsed_graph import *
+from typing import Set, Tuple, Iterable
 
-jsonData = {}
-nodeMap = {}
-
-"""
-Sample Node format
----------------------------------------------------------
-{
-    "data": {
-        "id": "module.root.module.network.aws_vpc.km_vpc",
-        "parent": "module.root.module.network",
-        "label": "aws_vpc.km_vpc",
-        "type": "resource"
-    },
-    "classes": [
-        "resource"
-    ]
-}
-"""
-def filter_vpc():
-    return filter(lambda elem: elem["data"]["label"].startswith("aws_vpc."), jsonData["nodes"])
-
-# Return mapping id -> node
-def create_node_map():
-    result = {}
-    for elem in jsonData["nodes"]:
-        result[elem["data"]["id"]] = elem
-    return result
+def filter_vpc(g: Graph) -> Iterable[Node]:
+    return g.FindResource(AwsResource.VPC)
 
 
-def identify_subnet(subnetLists):
+def identify_subnet(subnetLists: Iterable[Node]) -> Tuple[List[Node], List[Node]]:
     # Checking whether a direct connection from subnet to NAT
     public = []
     private = []
-    # 0 -> private, 1 -> public
-    flags = [0] * len(subnetLists)
-    idx = 0
-    for subnet in subnetLists:
-        subnetId = subnet["data"]["id"]
-        for edge in jsonData["edges"]: # TODO: improve performance
-            if edge["data"]["target"] == subnetId:
-                source = nodeMap[edge["data"]["source"]]
-                if source["data"]["label"].startswith("aws_nat_gateway."):
-                    flags[idx] = 1
-            
-        idx += 1
 
-    for i in range(len(flags)):
-        if flags[i] == 1:
-            public.append(subnetLists[i])
+    for subnet in subnetLists:
+        # Finding if any nat gateway point to subnet
+        if len(list(filter(
+            lambda x: x.CheckResourceType(AwsResource.NAT_GATEWAY), subnet.fromNodes))) > 0:
+            public.append(subnet)
         else:
-            private.append(subnetLists[i])
-    
+            private.append(subnet)
+
     return public, private
 
-"""
-Sample Edge format
----------------------------------------------------------
-{
-    "data": {
-        "id": "module.root.module.network.aws_subnet.km_private_subnet-module.root.module.network.aws_vpc.km_vpc",
-        "source": "module.root.module.network.aws_subnet.km_private_subnet",
-        "target": "module.root.module.network.aws_vpc.km_vpc",
-        "sourceType": "resource",
-        "targetType": "resource"
-    },
-    "classes": [
-        "resource-resource"
-    ]
-}
-"""
 
-def find_subnets(vpc):
-    subnets = []
-    # Find all aws_subnet that use info of this vpc
-    vpcId = vpc["data"]["id"]
-    for elem in jsonData["edges"]:
-        if elem["data"]["target"] == vpcId:
-            source = nodeMap[elem["data"]["source"]]
-            if source["data"]["label"].startswith("aws_subnet."):
-                subnets.append(source)
+def find_subnets(vpc: Node) -> Tuple[List[Node], List[Node]]:
+    subnets = filter(lambda x: x.CheckResourceType(AwsResource.SUBNET), vpc.fromNodes)
     return identify_subnet(subnets)
 
-def find_resource_in_subnet(subnet):
-    subnetId = subnet["data"]["id"]
+def find_resource_in_subnet(subnet: Node) -> Iterable[Node]:
+    # DFS ->  Iterate to all resource in this subnet
+    stack:List[Node] = [node for node in subnet.fromNodes]
+    visited = set(stack)
 
-    resources = []
+    while len(stack) > 0:
+        current = stack.pop()
+        visited.add(current)
+        for relatedNode in current.fromNodes:
+            if relatedNode not in visited:
+                stack.append(relatedNode)
     
-    # Case 1: Resource connect directly to subnet
-    for elem in jsonData["edges"]:
-        if elem["data"]["target"] == subnetId and elem["data"]["sourceType"] == "resource":
-            source = nodeMap[elem["data"]["source"]]
-            # Ignore the aws_nat_gateway & aws_route_table_association
-            if source["data"]["label"].startswith("aws_nat_gateway.") or \
-                source["data"]["label"].startswith("aws_route_table_association"):
-                    continue
-            resources.append(source)
-            
-    # Case 2: subnet -> output -> variable -> resource
-    # Find outputs
-    outputs = []
-    for elem in jsonData["edges"]:
-        if elem["data"]["target"] == subnetId and elem["data"]["sourceType"] == "output":
-            source = nodeMap[elem["data"]["source"]]
-            outputs.append(source)
-    # Find referenced variables
-    vars = []
-    for output in outputs:
-        outputId = output["data"]["id"]
-        for elem in jsonData["edges"]:
-            source = nodeMap[elem["data"]["source"]]
-            if elem["data"]["target"] == outputId and elem["data"]["sourceType"] == "var":
-                vars.append(source)
-    # Find referenced resources
-    for var in vars:
-        varId = var["data"]["id"]
-        for elem in jsonData["edges"]:
-            source = nodeMap[elem["data"]["source"]]
-            if elem["data"]["target"] == varId and elem["data"]["sourceType"] == "resource":
-                resources.append(source)
-
-    # TODO: handle special case (graph traversal to accessing all resources)
-    return resources
+    # filter resource only
+    return filter(lambda x: x.IsResource(), visited)
 
 
 def main(in_path, out_path="./output"):
-    global jsonData
-    global nodeMap
-    
     print(f"Reading {in_path}, Writing to {out_path}")
-    jsonData = json.load(open(in_path, "r"))
-    nodeMap = create_node_map()
-    vpcs = filter_vpc()
+    g = Graph.LoadFromFile(in_path)
+    vpcs = filter_vpc(g)
 
     tm = TM("AWS Threat Model")
     tm.isOrdered = True
 
     for vpc in vpcs:
-        print("Working on VPC:", vpc["data"]["id"])
+        print("Working on VPC:", vpc.label)
         
         # VPC Consist of public & private
         # Private & public consist of resources in subnets
-        vpcBound = Boundary(vpc["data"]["id"])
-        publicBound = Boundary("Public")
-        publicBound.inBoundary = vpcBound
+        vpcBound = Boundary(vpc.label)
+
+        # Public bound = vpc
         privateBound = Boundary("Private")
         privateBound.inBoundary = vpcBound
 
         pub, priv = find_subnets(vpc)
         print("List of public subnet:")
         for sub in pub:
-            print(sub["data"]["id"])
+            print(sub.label)
             refResources = find_resource_in_subnet(sub)
             for ref in refResources:
-                print("-", ref["data"]["id"])
+                print("-", ref.label)
                 # Temporary, TODO: classify resource -> correct TM element
-                server = Server(ref["data"]["id"])
-                server.inBoundary = publicBound
+                server = Server(ref.label)
+                server.inBoundary = vpcBound
             
         print("List of private subnet:")
         for sub in priv:
-            print(sub["data"]["id"])
+            print(sub.label)
             refResources = find_resource_in_subnet(sub)
             for ref in refResources:
-                print("-", ref["data"]["id"])
-                server = Server(ref["data"]["id"])
+                print("-", ref.label)
+                server = Server(ref.label)
                 server.inBoundary = privateBound
-            
         print("------------------------")
     print("Extracting Dotfile to output")
     

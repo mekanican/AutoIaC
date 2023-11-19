@@ -18,43 +18,16 @@ digraph tm {
     fontsize = 20;
     nodesep = 1;
 
-    subgraph cluster_boundary_modulerootmodulenetworkawsvpckmvpc_acf3059e70 {
+    subgraph cluster_boundary_awsvpckmvpc_acf3059e70 {
         graph [
             fontsize = 10;
             fontcolor = firebrick2;
             style = dashed;
             color = firebrick2;
-            label = <<i>module.root.module\n.network.aws_vpc.k\nm_vpc</i>>;
+            label = <<i>aws_vpc.km_vpc</i>>;
         ]
 
-        subgraph cluster_boundary_Public_88f2d9c06f {
-            graph [
-                fontsize = 10;
-                fontcolor = firebrick2;
-                style = dashed;
-                color = firebrick2;
-                label = <<i>Public</i>>;
-            ]
-
-            server_modulerootmodulenetworkawslbkmlb_f2eb7a3ff7 [
-                shape = circle;
-                color = black;
-                fontcolor = black;
-                label = "module.root.module\n.network.aws_lb.km\n_lb";
-                margin = 0.02;
-            ]
-
-            server_modulerootmodulecomputeawsinstancekmvm_d2006ce1bb [
-                shape = circle;
-                color = black;
-                fontcolor = black;
-                label = "module.root.module\n.compute.aws_insta\nnce.km_vm";
-                margin = 0.02;
-            ]
-
-        }
-
-        subgraph cluster_boundary_Private_579e9aae81 {
+        subgraph cluster_boundary_Private_88f2d9c06f {
             graph [
                 fontsize = 10;
                 fontcolor = firebrick2;
@@ -63,23 +36,143 @@ digraph tm {
                 label = <<i>Private</i>>;
             ]
 
-            server_modulerootmodulecomputeawsecsservicekmecsservice_f8af758679 [
+            server_awsdbsubnetgroupkmrdssubnetgrp_86e4604564 [
                 shape = circle;
                 color = black;
                 fontcolor = black;
-                label = "module.root.module\n.compute.aws_ecs_s\nervice.km_ecs_serv\nice";
+                label = "aws_db_subnet_grou\np.km_rds_subnet_gr\np";
                 margin = 0.02;
             ]
 
-            server_modulerootmodulestorageawsdbsubnetgroupkmrdssubnetgrp_2c440ebe53 [
+            server_awsssmparameterkmssmdbhost_b2e5892d06 [
                 shape = circle;
                 color = black;
                 fontcolor = black;
-                label = "module.root.module\n.storage.aws_db_su\nbnet_group.km_rds_\nsubnet_grp";
+                label = "aws_ssm_parameter.\nkm_ssm_db_host";
+                margin = 0.02;
+            ]
+
+            server_awsecsservicekmecsservice_990b886585 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_ecs_service.km\n_ecs_service";
+                margin = 0.02;
+            ]
+
+            server_awsroutetableassociationkmprivateroutetableassociation_9df04f8dae [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_route_table_as\nsociation.km_priva\nte_route_table_ass\nociation";
+                margin = 0.02;
+            ]
+
+            server_awsdbinstancekmdb_65d0d57a00 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_db_instance.km\n_db";
+                margin = 0.02;
+            ]
+
+            server_awsssmparameterkmssmdbuser_a22abb380b [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_ssm_parameter.\nkm_ssm_db_user";
+                margin = 0.02;
+            ]
+
+            server_awsssmparameterkmssmdbpassword_4c7b12dcc9 [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_ssm_parameter.\nkm_ssm_db_password";
+                margin = 0.02;
+            ]
+
+            server_awsssmparameterkmssmdbname_96ac87fabf [
+                shape = circle;
+                color = black;
+                fontcolor = black;
+                label = "aws_ssm_parameter.\nkm_ssm_db_name";
                 margin = 0.02;
             ]
 
         }
+
+        server_awslbtargetgroupkmlbtarget_579e9aae81 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_lb_target_grou\np.km_lb_target";
+            margin = 0.02;
+        ]
+
+        server_awsroutetablekmroutetable_f2eb7a3ff7 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_route_table.km\n_route_table";
+            margin = 0.02;
+        ]
+
+        server_localfilewebaccess_d2006ce1bb [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "local_file.web-\naccess";
+            margin = 0.02;
+        ]
+
+        server_awsecsservicekmecsservice_f8af758679 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_ecs_service.km\n_ecs_service";
+            margin = 0.02;
+        ]
+
+        server_awslblistenerkmfrontendlistener_2c440ebe53 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_lb_listener.km\n_frontend_listener";
+            margin = 0.02;
+        ]
+
+        server_awsroutetableassociationkmprivateroutetableassociation_0291419f72 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_route_table_as\nsociation.km_priva\nte_route_table_ass\nociation";
+            margin = 0.02;
+        ]
+
+        server_awsinstancekmvm_c76a0a7067 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_instance.km_vm";
+            margin = 0.02;
+        ]
+
+        server_awslbkmlb_c6f87088c2 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_lb.km_lb";
+            margin = 0.02;
+        ]
+
+        server_awsnatgatewaykmnatgateway_9345ab4c19 [
+            shape = circle;
+            color = black;
+            fontcolor = black;
+            label = "aws_nat_gateway.km\n_nat_gateway";
+            margin = 0.02;
+        ]
 
     }
 
