@@ -1,4 +1,5 @@
 import json
+from terraform_to_json import GetJSON
 """
 Sample Node format
 ---------------------------------------------------------
@@ -99,10 +100,11 @@ class Graph:
     def FindResource(self, t: ResourceName):
         return filter(lambda x: x.CheckResourceType(t), self._rescs)
 
-    def LoadFromFile(filePath: str) -> "Graph":
+    def LoadFromFolder(filePath: str) -> "Graph":
         g = Graph()
+        jsonPath = GetJSON(filePath)
 
-        data = json.load(open(filePath, "r"))
+        data = json.load(open(jsonPath, "r"))
         nodeInvMap:dict[str, Node] = {} 
         # Add all node info
         for node in data["nodes"]:

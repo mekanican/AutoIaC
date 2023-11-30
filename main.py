@@ -4,6 +4,8 @@ import json
 from pytm.pytm import TM, Server, Boundary
 from parsed_graph import *
 from typing import Set, Tuple, Iterable
+import logging
+logging.basicConfig(level = logging.INFO)
 
 def filter_vpc(g: Graph) -> Iterable[Node]:
     return g.FindResource(AwsResource.VPC)
@@ -47,7 +49,7 @@ def find_resource_in_subnet(subnet: Node) -> Iterable[Node]:
 
 def main(in_path, out_path="./output"):
     print(f"Reading {in_path}, Writing to {out_path}")
-    g = Graph.LoadFromFile(in_path)
+    g = Graph.LoadFromFolder(in_path)
     vpcs = filter_vpc(g)
 
     tm = TM("AWS Threat Model")
