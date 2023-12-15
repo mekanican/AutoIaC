@@ -1,2 +1,6 @@
 fire
 pydot
+GitPython
+python-hcl2
+dash
+dash_interactive_graphviz
