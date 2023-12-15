@@ -110,7 +110,7 @@ resource "aws_instance" "app_server" {
                             # value="resource {}",
                             # readOnly=True,
                             
-                        ), className="language-hcl"
+                        ), className="language-hcl line-numbers"
                     ), style=dict(flexGrow=1, position="relative", overflowY="scroll"),
                 )
             ],
