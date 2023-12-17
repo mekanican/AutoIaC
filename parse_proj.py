@@ -5,6 +5,9 @@ from glob import glob
 import os
 import hcl2
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Clone a project to temporary folder
 # Only public repository get cloned
@@ -18,17 +21,54 @@ def clone_temp(url: str) -> str:
 
 
 
-def parse_project_JSON(folderPath: str) -> str:
+def parse_project_JSON(folderPath: str, allBlock: dict = {}) -> str:
     # Parse root first
     tfList = glob(folderPath + "/*.tf")
     tfvarList = glob(folderPath + "/*.tfvars")
-    
-    data = hcl2.api.load(open(tfList[-1], "r"))
+    logger.info(f"Parsing {folderPath}:")
+    logger.info(", ".join(tfList))
 
-    print(tfList)
-    print(json.dumps(data, indent=2))
-    pass
+    for tf in tfList:
+        data = hcl2.api.load(open(tf, "r"))
+        for k,v in data.items():
+            if k not in allBlock:
+                allBlock[k] = v
+            else:
+                allBlock[k] += v # TODO: Find ways to separate module
+    
+    """
+    "module": [
+        {
+            "network": {
+                "source": "./modules/network",
+                "environment": "${var.environment}",
+                "default_tags": "${var.default_tags}"
+            }
+        },
+    """
+
+    modLocs = []
+
+    for mod in allBlock["module"]:
+        k, v = next(iter(mod.items())) 
+        # print("[***]",k, v)
+        logger.info("Found module " + k + " at " + v["source"])
+        # Move module to analyzed to ignore further analyze
+        if "analyzed_module" not in allBlock:
+            allBlock["analyzed_module"] = {k : v}
+        else:
+            allBlock["analyzed_module"][k] = v
+        modLocs.append(v["source"])
+    allBlock["module"] = []
+    for v in modLocs:
+        parse_project_JSON(folderPath + "/" + v, allBlock)
+    
+    # print(json.dumps(allBlock, indent=2))
+
 
 
 if __name__ == "__main__":
-    parse_project_JSON("../KaiMonkey/terraform/aws")
+    logging.basicConfig(level = logging.INFO)
+    allBlock = {}
+    parse_project_JSON("../KaiMonkey/terraform/aws", allBlock)
+    print(json.dumps(allBlock, indent=2))

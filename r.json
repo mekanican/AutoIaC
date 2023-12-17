@@ -1,0 +1,683 @@
+{
+  "variable": [
+    {
+      "environment": {
+        "default": "dev",
+        "description": "the type of environment (dev,staging/prod)"
+      }
+    },
+    {
+      "region": {
+        "default": "us-east-1"
+      }
+    },
+    {
+      "db_username": {
+        "default": "kai_monkey_user_ob6RGj"
+      }
+    },
+    {
+      "db_password": {
+        "default": "kHJ!4dusp7A#Xf21URhhZ1#"
+      }
+    },
+    {
+      "default_tags": {
+        "default": {},
+        "description": "default tags to resources"
+      }
+    },
+    {
+      "environment": {
+        "description": "the type of environment (dev,staging/prod)"
+      }
+    },
+    {
+      "default_tags": {
+        "default": {},
+        "description": "default tags to resources"
+      }
+    },
+    {
+      "az_count": {
+        "default": 2
+      }
+    },
+    {
+      "environment": {
+        "description": "the type of environment (dev,staging/prod)"
+      }
+    },
+    {
+      "default_tags": {
+        "default": {},
+        "description": "default tags to resources"
+      }
+    },
+    {
+      "private_subnet": {}
+    },
+    {
+      "vpc_id": {}
+    },
+    {
+      "db_username": {}
+    },
+    {
+      "db_password": {}
+    },
+    {
+      "environment": {
+        "description": "the type of environment (dev,staging/prod)"
+      }
+    },
+    {
+      "default_tags": {
+        "default": {},
+        "description": "default tags to resources"
+      }
+    },
+    {
+      "region": {}
+    },
+    {
+      "elb_target_group_arn": {}
+    },
+    {
+      "private_subnet": {}
+    },
+    {
+      "public_subnet": {}
+    },
+    {
+      "elb_sg": {}
+    },
+    {
+      "elb_url": {}
+    }
+  ],
+  "terraform": [
+    {
+      "required_providers": [
+        {
+          "aws": {
+            "source": "hashicorp/aws",
+            "version": "~> 3.11"
+          }
+        }
+      ]
+    }
+  ],
+  "provider": [
+    {
+      "aws": {
+        "region": "${var.region}"
+      }
+    }
+  ],
+  "module": [],
+  "resource": [
+    {
+      "local_file": {
+        "web-access": {
+          "content": "{\n  \"fqdn\": \"${module.network.elb_url}\"\n}",
+          "filename": "./web-access.json"
+        }
+      }
+    },
+    {
+      "aws_vpc": {
+        "km_vpc": {
+          "cidr_block": "10.0.0.0/16",
+          "enable_dns_support": true,
+          "enable_dns_hostnames": true,
+          "tags": "${merge(var.default_tags, {'Name': 'km_vpc_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_internet_gateway": {
+        "km_ig": {
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_ig_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_route": {
+        "km_route": {
+          "route_table_id": "${aws_vpc.km_vpc.main_route_table_id}",
+          "destination_cidr_block": "0.0.0.0/0",
+          "gateway_id": "${aws_internet_gateway.km_ig.id}"
+        }
+      }
+    },
+    {
+      "aws_subnet": {
+        "km_private_subnet": {
+          "count": "${var.az_count}",
+          "cidr_block": "${cidrsubnet(aws_vpc.km_vpc.cidr_block, 8, count.index)}",
+          "availability_zone": "${data.aws_availability_zones.available.names[count.index]}",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_private_subnet_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_subnet": {
+        "km_public_subnet": {
+          "count": "${var.az_count}",
+          "cidr_block": "${cidrsubnet(aws_vpc.km_vpc.cidr_block, 8, var.az_count + count.index)}",
+          "availability_zone": "${data.aws_availability_zones.available.names[count.index]}",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "map_public_ip_on_launch": true,
+          "tags": "${merge(var.default_tags, {'Name': 'km_public_subnet_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_eip": {
+        "km_eip": {
+          "count": "${var.az_count}",
+          "vpc": true,
+          "depends_on": [
+            "${aws_internet_gateway.km_ig}"
+          ],
+          "tags": "${merge(var.default_tags, {'Name': 'km_eip_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_nat_gateway": {
+        "km_nat_gateway": {
+          "count": "${var.az_count}",
+          "subnet_id": "${element(aws_subnet.km_public_subnet.*.id, count.index)}",
+          "allocation_id": "${element(aws_eip.km_eip.*.id, count.index)}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_nat_gateway_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_route_table": {
+        "km_route_table": {
+          "count": "${var.az_count}",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "route": [
+            {
+              "cidr_block": "0.0.0.0/0",
+              "nat_gateway_id": "${element(aws_nat_gateway.km_nat_gateway.*.id, count.index)}"
+            }
+          ],
+          "tags": "${merge(var.default_tags, {'Name': 'km_route_table_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_route_table_association": {
+        "km_private_route_table_association": {
+          "count": "${var.az_count}",
+          "subnet_id": "${element(aws_subnet.km_private_subnet.*.id, count.index)}",
+          "route_table_id": "${element(aws_route_table.km_route_table.*.id, count.index)}"
+        }
+      }
+    },
+    {
+      "aws_security_group": {
+        "km_alb_sg": {
+          "name": "km_alb_sg_${var.environment}",
+          "description": "controls access to the ALB",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "ingress": [
+            {
+              "protocol": "tcp",
+              "from_port": 443,
+              "to_port": 443,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            },
+            {
+              "protocol": "tcp",
+              "from_port": 80,
+              "to_port": 80,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }
+          ],
+          "egress": [
+            {
+              "from_port": 0,
+              "to_port": 0,
+              "protocol": "-1",
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }
+          ],
+          "tags": "${merge(var.default_tags, {})}"
+        }
+      }
+    },
+    {
+      "aws_security_group": {
+        "km_ecs_sg": {
+          "name": "km_ecs_sg",
+          "description": "allow inbound access from the ALB only",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "ingress": [
+            {
+              "protocol": "tcp",
+              "from_port": "80",
+              "to_port": "80",
+              "security_groups": [
+                "${aws_security_group.km_alb_sg.id}"
+              ]
+            }
+          ],
+          "egress": [
+            {
+              "protocol": "-1",
+              "from_port": 0,
+              "to_port": 0,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }
+          ],
+          "tags": "${merge(var.default_tags, {'Name': 'km_ecs_sg_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_lb": {
+        "km_lb": {
+          "name": "km-lb-${var.environment}",
+          "subnets": "${aws_subnet.km_public_subnet.*.id}",
+          "security_groups": [
+            "${aws_security_group.km_alb_sg.id}"
+          ]
+        }
+      }
+    },
+    {
+      "aws_lb_target_group": {
+        "km_lb_target": {
+          "name": "km-lb-target-group-${var.environment}",
+          "port": 80,
+          "protocol": "HTTP",
+          "vpc_id": "${aws_vpc.km_vpc.id}",
+          "target_type": "ip",
+          "depends_on": [
+            "${aws_lb.km_lb}"
+          ]
+        }
+      }
+    },
+    {
+      "aws_lb_listener": {
+        "km_frontend_listener": {
+          "load_balancer_arn": "${aws_lb.km_lb.arn}",
+          "port": "80",
+          "protocol": "HTTP",
+          "default_action": [
+            {
+              "target_group_arn": "${aws_lb_target_group.km_lb_target.arn}",
+              "type": "forward"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "aws_db_subnet_group": {
+        "km_rds_subnet_grp": {
+          "name": "km_rds_subnet_grp_${var.environment}",
+          "subnet_ids": "${var.private_subnet}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_rds_subnet_grp_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_security_group": {
+        "km_rds_sg": {
+          "name": "km_rds_sg",
+          "vpc_id": "${var.vpc_id}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_rds_sg_${var.environment}'})}",
+          "ingress": [
+            {
+              "from_port": 5432,
+              "to_port": 5432,
+              "protocol": "tcp",
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }
+          ],
+          "egress": [
+            {
+              "from_port": 0,
+              "to_port": 0,
+              "protocol": "-1",
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "aws_kms_key": {
+        "km_db_kms_key": {
+          "description": "KMS Key for DB instance ${var.environment}",
+          "deletion_window_in_days": 10,
+          "enable_key_rotation": true,
+          "tags": "${merge(var.default_tags, {'Name': 'km_db_kms_key_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_db_instance": {
+        "km_db": {
+          "name": "km_db_${var.environment}",
+          "allocated_storage": 20,
+          "engine": "postgres",
+          "engine_version": "10.6",
+          "instance_class": "db.t3.medium",
+          "storage_type": "gp2",
+          "password": "${var.db_password}",
+          "username": "${var.db_username}",
+          "vpc_security_group_ids": [
+            "${aws_security_group.km_rds_sg.id}"
+          ],
+          "db_subnet_group_name": "${aws_db_subnet_group.km_rds_subnet_grp.id}",
+          "identifier": "km-db-${var.environment}",
+          "storage_encrypted": true,
+          "skip_final_snapshot": true,
+          "final_snapshot_identifier": "km-db-${var.environment}-db-destroy-snapshot",
+          "kms_key_id": "${aws_kms_key.km_db_kms_key.arn}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_db_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_ssm_parameter": {
+        "km_ssm_db_host": {
+          "name": "/km-${var.environment}/DB_HOST",
+          "description": "Kai Monkey Database",
+          "type": "SecureString",
+          "value": "${aws_db_instance.km_db.endpoint}",
+          "tags": "${merge(var.default_tags, {})}"
+        }
+      }
+    },
+    {
+      "aws_ssm_parameter": {
+        "km_ssm_db_password": {
+          "name": "/km-${var.environment}/DB_PASSWORD",
+          "description": "Kai Monkey Database Password",
+          "type": "SecureString",
+          "value": "${aws_db_instance.km_db.password}",
+          "tags": "${merge(var.default_tags, {})}"
+        }
+      }
+    },
+    {
+      "aws_ssm_parameter": {
+        "km_ssm_db_user": {
+          "name": "/km-${var.environment}/DB_USER",
+          "description": "Kai Monkey Database Username",
+          "type": "SecureString",
+          "value": "${aws_db_instance.km_db.username}",
+          "tags": "${merge(var.default_tags, {})}"
+        }
+      }
+    },
+    {
+      "aws_ssm_parameter": {
+        "km_ssm_db_name": {
+          "name": "/km-${var.environment}/DB_NAME",
+          "description": "Kai Monkey Database Name",
+          "type": "SecureString",
+          "value": "${aws_db_instance.km_db.name}",
+          "tags": "${merge(var.default_tags, {'environment': '${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_s3_bucket": {
+        "km_blob_storage": {
+          "bucket": "km-blob-storage-${var.environment}",
+          "acl": "private",
+          "tags": "${merge(var.default_tags, {'name': 'km_blob_storage_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_s3_bucket": {
+        "km_public_blob": {
+          "bucket": "km-public-blob"
+        }
+      }
+    },
+    {
+      "aws_s3_bucket_public_access_block": {
+        "km_public_blob": {
+          "bucket": "${aws_s3_bucket.km_public_blob.id}",
+          "block_public_acls": false,
+          "block_public_policy": false
+        }
+      }
+    },
+    {
+      "aws_iam_role": {
+        "km_ecs_task_execution_role": {
+          "name": "km_ecs_task_execution_role_${var.environment}",
+          "assume_role_policy": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Action\": \"sts:AssumeRole\",\n      \"Principal\": {\n        \"Service\": \"ecs-tasks.amazonaws.com\"\n      },\n      \"Effect\": \"Allow\",\n      \"Sid\": \"\"\n    }\n  ]\n}",
+          "tags": "${merge(var.default_tags, {'name': 'km_ecs_task_execution_role_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_iam_policy": {
+        "km_ssm_secrets_policy": {
+          "name": "km_ssm_secrets_policy_${var.environment}",
+          "description": "Kai Monkey SSM Secrets Policy",
+          "policy": "{\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\n            \"Sid\": \"KaiMonkeySSMSecretsPolicyGet\",\n            \"Effect\": \"Allow\",\n            \"Action\": \"secretsmanager:GetSecretValue\",\n            \"Resource\": \"*\"\n        },\n        {\n            \"Sid\": \"KaiMonkeySSMSecretsPolicyGetDecrypt\",\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"kms:Decrypt\",\n                \"ssm:GetParameters\",\n                \"ssm:GetParameter\"\n            ],\n            \"Resource\": \"*\"\n        }\n    ]\n}"
+        }
+      }
+    },
+    {
+      "aws_iam_role_policy_attachment": {
+        "km_ecs_task_exec_role_policy_attach": {
+          "role": "${aws_iam_role.km_ecs_task_execution_role.name}",
+          "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        }
+      }
+    },
+    {
+      "aws_iam_role_policy_attachment": {
+        "km_ssm_secrets_policy_policy_attach": {
+          "role": "${aws_iam_role.km_ecs_task_execution_role.name}",
+          "policy_arn": "${aws_iam_policy.km_ssm_secrets_policy.arn}"
+        }
+      }
+    },
+    {
+      "aws_ecs_cluster": {
+        "km_ecs_cluster": {
+          "name": "km_ecs_cluster-${var.environment}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_ecs_cluster_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_ecs_task_definition": {
+        "km_ecs_task": {
+          "family": "km_ecs_task_${var.environment}",
+          "container_definitions": "${data.template_file.km_ecs_template.rendered}",
+          "network_mode": "awsvpc",
+          "requires_compatibilities": [
+            "FARGATE"
+          ],
+          "cpu": 512,
+          "memory": 1024,
+          "execution_role_arn": "${aws_iam_role.km_ecs_task_execution_role.arn}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_ecs_task_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_ecs_service": {
+        "km_ecs_service": {
+          "name": "km_ecs_service_${var.environment}",
+          "cluster": "${aws_ecs_cluster.km_ecs_cluster.id}",
+          "task_definition": "${aws_ecs_task_definition.km_ecs_task.arn}",
+          "desired_count": 1,
+          "launch_type": "FARGATE",
+          "load_balancer": [
+            {
+              "target_group_arn": "${var.elb_target_group_arn}",
+              "container_name": "km-frontend",
+              "container_port": 80
+            }
+          ],
+          "network_configuration": [
+            {
+              "assign_public_ip": true,
+              "subnets": "${var.private_subnet}",
+              "security_groups": [
+                "${var.elb_sg}"
+              ]
+            }
+          ],
+          "tags": "${merge(var.default_tags, {})}"
+        }
+      }
+    },
+    {
+      "aws_cloudwatch_log_group": {
+        "km_log_group": {
+          "name": "km_log_group_${var.environment}",
+          "retention_in_days": 1,
+          "tags": "${merge(var.default_tags, {'Name': 'km_log_group_${var.environment}'})}"
+        }
+      }
+    },
+    {
+      "aws_instance": {
+        "km_vm": {
+          "ami": "${data.aws_ami.ubuntu_ami.id}",
+          "instance_type": "t2.micro",
+          "vpc_security_group_ids": [
+            "${var.elb_sg}"
+          ],
+          "subnet_id": "${var.public_subnet[0]}",
+          "tags": "${merge(var.default_tags, {'Name': 'km_vm_${var.environment}'})}"
+        }
+      }
+    }
+  ],
+  "analyzed_module": {
+    "network": {
+      "source": "./modules/network",
+      "environment": "${var.environment}",
+      "default_tags": "${var.default_tags}"
+    },
+    "storage": {
+      "source": "./modules/storage",
+      "private_subnet": "${module.network.private_subnet}",
+      "vpc_id": "${module.network.vpc_id}",
+      "environment": "${var.environment}",
+      "default_tags": "${var.default_tags}",
+      "db_username": "${var.db_username}",
+      "db_password": "${var.db_password}"
+    },
+    "compute": {
+      "source": "./modules/compute",
+      "environment": "${var.environment}",
+      "region": "${var.region}",
+      "elb_target_group_arn": "${module.network.target_lb_group_arn}",
+      "private_subnet": "${module.network.private_subnet}",
+      "public_subnet": "${module.network.public_subnet}",
+      "elb_sg": "${module.network.target_lb_security_group}",
+      "elb_url": "${module.network.elb_url}"
+    }
+  },
+  "output": [
+    {
+      "private_subnet": {
+        "value": "${aws_subnet.km_private_subnet.*.id}"
+      }
+    },
+    {
+      "public_subnet": {
+        "value": "${aws_subnet.km_public_subnet.*.id}"
+      }
+    },
+    {
+      "vpc_id": {
+        "value": "${aws_vpc.km_vpc.id}"
+      }
+    },
+    {
+      "target_lb_group_arn": {
+        "value": "${aws_lb_target_group.km_lb_target.arn}"
+      }
+    },
+    {
+      "target_lb_security_group": {
+        "value": "${aws_security_group.km_alb_sg.id}"
+      }
+    },
+    {
+      "elb_url": {
+        "value": "http://${aws_lb.km_lb.dns_name}"
+      }
+    }
+  ],
+  "data": [
+    {
+      "aws_availability_zones": {
+        "available": {}
+      }
+    },
+    {
+      "template_file": {
+        "km_ecs_template": {
+          "template": "${file(\"./modules/compute/task-definitions.json\")}",
+          "vars": {
+            "ENVIRONMENT": "${var.environment}",
+            "LOG_GROUP": "${aws_cloudwatch_log_group.km_log_group.name}",
+            "REGION": "${var.region}"
+          }
+        }
+      }
+    },
+    {
+      "aws_ami": {
+        "ubuntu_ami": {
+          "most_recent": true,
+          "filter": [
+            {
+              "name": "name",
+              "values": [
+                "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+              ]
+            },
+            {
+              "name": "virtualization-type",
+              "values": [
+                "hvm"
+              ]
+            }
+          ],
+          "owners": [
+            "099720109477"
+          ]
+        }
+      }
+    }
+  ]
+}
