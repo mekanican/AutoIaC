@@ -32,7 +32,7 @@ Sample Edge format
 }
 """
 from enum import Enum
-from typing import List, Type, TypeVar
+from typing import List, Type, TypeVar, Tuple
 
 ResourceName = TypeVar("ResourceName", bound=Enum)
 
@@ -54,7 +54,7 @@ class Type(Enum):
 
 class Node:
     def __init__(self, provider: Type, kvargs: dict[str, str]):
-        self.id = kvargs["id"]
+        self.module = Node.ParseModule(kvargs["id"])
         self.parent = kvargs.get("parent", "")
         self.label = kvargs["label"]
         self.type = Type(kvargs["type"])
@@ -66,6 +66,20 @@ class Node:
             self.rescType = provider(resourceType)
         except:
             self.rescType = None
+    
+    # module.root.module.network.aws_vpc.km_vpc
+    # ID has multiple module layer ->  get last layer
+    # And prioritize Resource type
+    def ParseModule(id: str) -> str:
+        splitted = id.split(".")
+        idx = -1
+        for i in range(len(splitted)):
+            if splitted[i] == 'module':
+                idx = i
+        if idx == -1:
+            return "" # Error
+        module = splitted[idx+1]
+        return module
 
     def AddFromNode(self, n: "Node"):
         self.fromNodes.append(n)
