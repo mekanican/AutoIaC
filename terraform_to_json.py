@@ -7,12 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Json from terraform proj
-def GetJSON(folderPath: str) -> str:
+def GetJSON(folderPath: str, init: bool) -> str:
     # check if folderPath exist
     if not os.path.exists(folderPath):
         raise Exception("Cannot found specified folder path!")
-    
-    InitTerraform(folderPath)
+    if init:
+        InitTerraform(folderPath)
     dotPath = GenerateDotFile(folderPath)
     jsonPath = GenerateJSON(dotPath)
     return jsonPath    

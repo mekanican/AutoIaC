@@ -93,12 +93,12 @@ class Graph:
     def AddResource(self, n: Node):
         self._rescs.append(n)
 
-    def FindResource(self, t: ResourceName):
-        return filter(lambda x: x.CheckResourceType(t), self._rescs)
+    def FindResource(self, t: List[ResourceName]):
+        return filter(lambda x: any(x.CheckResourceType(i) for i in t), self._rescs)
 
-    def LoadFromFolder(filePath: str) -> "Graph":
+    def LoadFromFolder(filePath: str, init=True) -> "Graph":
         g = Graph()
-        jsonPath = GetJSON(filePath)
+        jsonPath = GetJSON(filePath, init)
 
         data = json.load(open(jsonPath, "r"))
         nodeInvMap:dict[str, Node] = {} 
