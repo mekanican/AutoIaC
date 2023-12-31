@@ -17,20 +17,24 @@ class AwsResource(Enum):
     API_GATEWAY         = "aws_api_gateway_rest_api"
     COGNITO             = "aws_cognito_user_pool"
     DYNAMODB            = "aws_dynamodb_table"
+    IAM                 = "aws_iam_instance_profile"
 
 # Grouping Resource into more generalized name
 class ComponentGroup(set, Enum):
     MACHINE             = {AwsResource.EC2}
-    FILE_STORAGE        = {AwsResource.S3}
     SERVERLESS_FUNCTION = {AwsResource.LAMBDA}
     WEBAPP              = {AwsResource.AMPLIFY}
     AUTHENTICATOR       = {AwsResource.COGNITO}
-    DATABASE            = {AwsResource.DYNAMODB}
 
 class BoundaryGroup(set, Enum):
     VIRTUAL_NETWORK     = {AwsResource.VPC}
     VIRTUAL_FIREWALL    = {AwsResource.SECURITY_GROUP}
     SUBNET              = {AwsResource.SUBNET}
+    IAM                 = {AwsResource.IAM}
+
+class DataStoreGroup(set, Enum):
+    FILE_STORAGE        = {AwsResource.S3}
+    DATABASE            = {AwsResource.DYNAMODB}
 
 class Type(Enum):
     RESOURCE    = "resource"
