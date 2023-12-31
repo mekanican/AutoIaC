@@ -31,26 +31,8 @@ Sample Edge format
     ]
 }
 """
-from enum import Enum
-from typing import List, Type, TypeVar, Tuple
-
-ResourceName = TypeVar("ResourceName", bound=Enum)
-
-class AwsResource(Enum):
-    VPC = "aws_vpc"
-    SUBNET = "aws_subnet"
-    ROUTE_TABLE = "aws_route_table"
-    ROUTE_TABLE_ASSOC = "aws_route_table_association"
-    NAT_GATEWAY = "aws_nat_gateway"
-
-    
-
-class Type(Enum):
-    RESOURCE = "resource"
-    OUTPUT = "output"
-    VARIABLE = "var"
-    MODULE = "module"
-    PROVIDER = "provider" 
+from typing import List, Type
+from definition import *
 
 class Node:
     def __init__(self, provider: Type, kvargs: dict[str, str]):
