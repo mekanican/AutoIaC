@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import TypeVar
 
-ResourceName = TypeVar("ResourceName", bound=Enum)
+ResourceName    = TypeVar("ResourceName", bound=Enum)
+GroupName       = TypeVar("GroupName", bound=Enum)
 
 class AwsResource(Enum):
     VPC                 = "aws_vpc"
