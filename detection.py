@@ -23,18 +23,3 @@ def filter_data_store(g: Graph):
 # Function to specialize group to parse (usually Boundaries)
 def filter_group(i: Iterable[Node], name: GroupName) -> Iterable[Node]:
     return filter(lambda x: x.rescType in name, i)
-
-
-def aws_identify_subnet(subnetLists: Iterable[Node]) -> Tuple[List[Node], List[Node]]:
-    # Checking whether a direct connection from subnet to NAT
-    public = []
-    private = []
-
-    for subnet in subnetLists:
-        # Finding if any nat gateway point to subnet
-        if any(filter(lambda x: x.CheckResourceType(AwsResource.NAT_GATEWAY), subnet.fromNodes)):
-            public.append(subnet)
-        else:
-            private.append(subnet)
-
-    return public, private
