@@ -1,3 +1,0 @@
-function f() {
-    Prism.highlightAll();
-}
