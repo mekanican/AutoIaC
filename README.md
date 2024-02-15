@@ -1,6 +1,9 @@
 # AutoIaC
 Automated App to convert IaCs scripts to DFD
 
+## Sample architecture:
+![](./architecture/main.png)
+
 ## Step
 1. Install Terraform CLI or OpenTofu manually or run `prepare.sh`
 - https://developer.hashicorp.com/terraform/install?product_intent=terraform
