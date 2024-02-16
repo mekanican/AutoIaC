@@ -32,7 +32,8 @@ Sample Edge format
 }
 """
 from typing import List, Type
-from definition import *
+from annotation import ResourceName, AwsResource
+
 
 class Node:
     def __init__(self, provider: Type, kvargs: dict[str, str]):

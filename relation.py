@@ -1,5 +1,5 @@
 from parsed_graph import Node
-from definition import AwsResource
+from annotation import AwsResource
 from functools import lru_cache
 from typing import Set, Iterable, Tuple, List
 

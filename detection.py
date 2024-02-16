@@ -1,7 +1,6 @@
 from parsed_graph import Graph, Node
-from definition import GroupName, ComponentGroup, BoundaryGroup, DataStoreGroup, AwsResource
-from typing import Tuple, Iterable, List
-from enum import Enum
+from annotation import GroupName, ComponentGroup, BoundaryGroup, DataStoreGroup
+from typing import Iterable
 
 def filter_template(g: Graph, type):
     components = []
