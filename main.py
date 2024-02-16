@@ -1,21 +1,22 @@
 #!/usr/bin/python3
 import fire
-# import json
-# from pytm.pytm import TM, Server, Boundary
-from parsed_graph import *
-from detection import *
-from relation import *
-from dfd import *
 import logging
+import graphviz
+
+from dfdgraph.component import DataStore
+from graph import Graph
+from rule.filter import filter_group, filter_component, filter_boundary, filter_data_store
+from dfdgraph import Diagram, Process, TrustBoundary
+from rule.aws_relation import aws_subnet_relation, aws_identify_subnet, aws_component_relation, aws_component2component
+from annotation import BoundaryGroup
+from utils import debug_node_list
+
 logging.basicConfig(level = logging.INFO)
 
-def debug_node_list(nodes: Iterable[Node]):
-    for n in nodes:
-        print("\t- " + n.label)
 
-def main(in_path, out_path="./output"):
+def main(in_path, out_path="./output", reinit=True):
     print(f"Reading {in_path}, Writing to {out_path}")
-    g = Graph.LoadFromFolder(in_path, False)
+    g = Graph.LoadFromFolder(in_path, reinit)
 
     components = list(filter_component(g))
     boundaries = list(filter_boundary(g))
@@ -51,6 +52,13 @@ def main(in_path, out_path="./output"):
     aws = TrustBoundary("AWS")
     diag.AddBoundary(aws)
 
+
+    # Show datastore first
+    for ds in dataStores:
+        data = DataStore(ds.label)
+        aws.AddNode(data)
+        diag.AddPublicNode(data)
+
     # Each VPC has Boundaries
     for vpc in vpcs:
         logging.info("Process " + vpc.label)
@@ -68,6 +76,8 @@ def main(in_path, out_path="./output"):
                 p = Process(component.label)
                 v.AddNode(p)
                 processedNodes.add(component)
+                # diag.AddPublicNode(p)
+                # print("-<", component.label)
         if len(private) == 0:
             continue
         priv = TrustBoundary("Private Subnet")
@@ -78,16 +88,21 @@ def main(in_path, out_path="./output"):
             # Find components related to this subnet
             for component in aws_component_relation(components, sub):
                 p = Process(component.label)
-                v.AddNode(p)
+                priv.AddNode(p)
                 processedNodes.add(component)
+                # print("-<<", component.label)
         
     for other in set(components).difference(processedNodes):
         p = Process(other.label)
         aws.AddNode(p)
         diag.AddPublicNode(p)
+        # print("-<<<", component.label)
+
+    # TODO: Component 2 component connection
+    # TODO: Fix why aws_instance in private subnet
         
     diag.DrawDiagram(g)
-    g.render(view=False)
+    g.render(filename="out", format="png", view=False)
     
 
 if __name__ == '__main__':

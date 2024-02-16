@@ -1,4 +1,4 @@
-from parsed_graph import Graph, Node
+from graph import Graph, Node
 from annotation import GroupName, ComponentGroup, BoundaryGroup, DataStoreGroup
 from typing import Iterable
 

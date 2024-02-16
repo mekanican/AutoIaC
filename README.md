@@ -8,7 +8,7 @@ Automated App to convert IaCs scripts to DFD
 1. Install Terraform CLI or OpenTofu manually or run `prepare.sh`
 - https://developer.hashicorp.com/terraform/install?product_intent=terraform
 - https://github.com/opentofu/opentofu
-2. Install [Terraform Graph Beautifier](https://github.com/pcasteran/terraform-graph-beautifier)
+2. Install [Terraform Graph Beautifier](https://github.com/pcasteran/terraform-graph-beautifier) (Make sure the executable is accessible from PATH)
 
 ```
 go install github.com/pcasteran/terraform-graph-beautifier@latest
@@ -20,3 +20,10 @@ go install github.com/pcasteran/terraform-graph-beautifier@latest
 6. Analyze with this tool
 - `./main.py <terraform_project_path> -o <folder_path_to_store_dfd_dot> `
 - `-o ..` part is optional, default to current directory output folder
+- `--reinit=False` to disable project reinit (for second run)
+
+By default, program will seek for terraform executable, if you want to run the program with OpenTofu, use:
+```bash
+    TOFU=1; ./main.py ... # in bash
+    set -x TOFU 1; ./main.py ... # in fish
+```

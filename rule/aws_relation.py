@@ -1,24 +1,7 @@
-from parsed_graph import Node
+from typing import Iterable, Tuple, List
+from graph import Node
 from annotation import AwsResource
-from functools import lru_cache
-from typing import Set, Iterable, Tuple, List
-
-# Check directional path from A ->  B
-@lru_cache
-def is_connected(a: Node, b: Node):
-    if a is b:
-        return True
-
-    def dfs(m: Node, n: Node, visited: Set):
-        if m is n:
-            return True
-        visited.add(m)
-        for nxt in m.toNodes:
-            if nxt not in visited and dfs(nxt, n, visited):
-                return True
-        return False
-
-    return dfs(a, b, set())
+from utils import is_connected
 
 def aws_identify_subnet(subnetLists: Iterable[Node]) -> Tuple[List[Node], List[Node]]:
     # Checking whether a direct connection from subnet to NAT

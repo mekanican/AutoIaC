@@ -1,27 +1,35 @@
-#!/usr/bin/env
-from random import choices
 import os
 from subprocess import run
 import logging
+from utils import get_random_tmp_path
 
 logger = logging.getLogger(__name__)
 
-# Json from terraform proj
-def GetJSON(folderPath: str, init: bool) -> str:
+def GetJSON(folderPath: str, init: bool, isTofu=True) -> str:
+    """Dump JSON graph information from terraform project
+
+    Args:
+        folderPath (str): Path to terraform project
+        init (bool): Re-init the terraform project (Destructive!, useful for first time run, otherwise should be False)
+        isTofu (bool, optional): Use OpenTofu executable instead of Terraform. Defaults to True.
+
+    Raises:
+        Exception: Invalid Folder path
+
+    Returns:
+        str: Path to generated JSON
+    """
     # check if folderPath exist
     if not os.path.exists(folderPath):
         raise Exception("Cannot found specified folder path!")
     if init:
-        InitTerraform(folderPath)
-    dotPath = GenerateDotFile(folderPath)
+        InitTerraform(folderPath, isTofu)
+    dotPath = GenerateDotFile(folderPath, isTofu)
     jsonPath = GenerateJSON(dotPath)
     return jsonPath    
 
-def GetRandomTmpPath(suffix: str = ".dot") -> str:
-    name = ''.join(choices("abcdefghABCDEFGH12345678", k=8))
-    return "/tmp/" + name + suffix
 
-def InitTerraform(folderPath):
+def InitTerraform(folderPath, isTofu=True):
     # Cleanup
     command = [
             "rm",
@@ -34,7 +42,7 @@ def InitTerraform(folderPath):
     run(command)
     # Init
     command = [
-            "tofu",
+            "tofu" if isTofu else "terraform",
             "-chdir=%s"%folderPath,
             "init"
     ]
@@ -43,9 +51,9 @@ def InitTerraform(folderPath):
     run(command, check=True)
 
 # tofu graph -chdir ../aws_vpc_msk/
-def GenerateDotFile(folderPath: str) -> str:
+def GenerateDotFile(folderPath: str, isTofu=True) -> str:
     command = [
-            "tofu",
+            "tofu" if isTofu else "terraform",
             "-chdir=%s"%folderPath,
             "graph"
     ]
@@ -53,7 +61,7 @@ def GenerateDotFile(folderPath: str) -> str:
     logger.info("Running %s" % ' '.join(command)) 
     result = run(command, capture_output=True, check=True)
     
-    path = GetRandomTmpPath()
+    path = get_random_tmp_path()
     logger.info("Writting to %s" % path)
 
     with open(path, "wb") as f:
@@ -72,7 +80,7 @@ def GenerateJSON(dotPath: str) -> str:
     logger.info("Running %s" % ' '.join(command)) 
     result = run(command, capture_output=True, check=True)
     
-    path = GetRandomTmpPath(".json")
+    path = get_random_tmp_path(".json")
     logger.info("Writting to %s" % path)
 
     with open(path, "wb") as f:
