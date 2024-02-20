@@ -14,8 +14,8 @@ class Diagram:
         # Connect to all public node
         # !TODO: Assume User has bidirectional data flow to those node
         for node in self.publicNodes:
-            user.AddEdge(node.id)
-            node.AddEdge(user.id)
+            user.AddEdge(node)
+            node.AddEdge(user)
 
         # Separating node and edge draw (graphviz bug)
         user.DrawNode(g)

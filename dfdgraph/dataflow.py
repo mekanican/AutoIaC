@@ -1,9 +1,9 @@
 import graphviz
 
 class DataFlow:
-    def __init__(self, fromId: str, toId: str, label):
-        self.fromId = fromId
-        self.toId = toId
+    def __init__(self, fromNode, toNode, label):
+        self.fromNode = fromNode
+        self.toNode = toNode
         self.label = label
     def MakeDirected(self, g: graphviz.Digraph):
-        g.edge(self.fromId, self.toId, label=self.label)
+        g.edge(self.fromNode.id, self.toNode.id, label=self.label)
