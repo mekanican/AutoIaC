@@ -16,6 +16,17 @@ class ActorType(Enum):
 #     FLOW = "flow"
 #     SINGLE = "single" # TODO: implement this in list
 
+"""
+----- Specific Mapping -----
+External Entities + name="User" = Remote User & Compliance Manager (TODO: find way to discriminate between those 2)
+Process = Cloud Application
+Process + public = External Service
+Data Store = Host Storage
+TODO: Virtual Machine, Container
+
+"""
+
+
 class Flow:
     def __init__(self, from_: ActorType, to_:ActorType):
         self.from_ = from_

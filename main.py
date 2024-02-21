@@ -10,6 +10,7 @@ from dfdgraph import Diagram, Process, TrustBoundary
 from rule.aws_relation import aws_subnet_relation, aws_identify_subnet, aws_component_relation, aws_component2component
 from annotation import BoundaryGroup
 from utils import debug_node_list
+from itertools import combinations
 
 logging.basicConfig(level = logging.INFO)
 
@@ -52,12 +53,16 @@ def main(in_path, out_path="./output", reinit=True):
     aws = TrustBoundary("AWS")
     diag.AddBoundary(aws)
 
+    # TODO: optimize
+    node_2_dfdnode = {}
+
 
     # Show datastore first
     for ds in dataStores:
         data = DataStore(ds.label)
         aws.AddNode(data)
         diag.AddPublicNode(data)
+        node_2_dfdnode[ds] = data
 
     # Each VPC has Boundaries
     for vpc in vpcs:
@@ -78,6 +83,26 @@ def main(in_path, out_path="./output", reinit=True):
                 processedNodes.add(component)
                 # diag.AddPublicNode(p)
                 # print("-<", component.label)
+                node_2_dfdnode[component] = p
+
+        # Assumption: no public subnet => every component is public
+        # Correct way: check route table with CDIR 0.0.0.0/0 & Target internet gateway
+        # Or: map_public_ip_on_launch in subnet
+        # TODO: implement improve hcl parser to link info to resource.
+        if len(public) == 0:
+            for sub in private:
+                logging.info("-> Process " + sub.label)
+                # Find components related to this subnet
+                for component in aws_component_relation(components, sub):
+                    p = Process(component.label)
+                    v.AddNode(p)
+                    processedNodes.add(component)
+                    diag.AddPublicNode(p)
+                    # print("-<<", component.label)
+                    node_2_dfdnode[component] = p
+            continue
+            
+                
         if len(private) == 0:
             continue
         priv = TrustBoundary("Private Subnet")
@@ -91,15 +116,28 @@ def main(in_path, out_path="./output", reinit=True):
                 priv.AddNode(p)
                 processedNodes.add(component)
                 # print("-<<", component.label)
-        
+                node_2_dfdnode[component] = p
+    
+    # Keep the rest in AWS's boundary and assume the publicity    
     for other in set(components).difference(processedNodes):
         p = Process(other.label)
         aws.AddNode(p)
         diag.AddPublicNode(p)
+        node_2_dfdnode[other] = p
         # print("-<<<", component.label)
 
     # TODO: Component 2 component connection
-    # TODO: Fix why aws_instance in private subnet
+    components_ds = set(components).union(set(dataStores))
+    for u in components_ds:
+        for c in aws_component2component(components_ds, u, False):
+            node_2_dfdnode[u].AddEdge(node_2_dfdnode[c])
+        for c in aws_component2component(components_ds, u, True):
+            node_2_dfdnode[c].AddEdge(node_2_dfdnode[u])
+            
+    # for u,v in combinations(components_ds, 2):
+    #     aws_component2component()
+    #     pass
+
         
     diag.DrawDiagram(g)
     g.render(filename="out", format="png", view=False)
