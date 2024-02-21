@@ -55,7 +55,8 @@ def GenerateDotFile(folderPath: str, isTofu=True) -> str:
     command = [
             "tofu" if isTofu else "terraform",
             "-chdir=%s"%folderPath,
-            "graph"
+            "graph",
+            "-type=plan"
     ]
 
     logger.info("Running %s" % ' '.join(command)) 
