@@ -3,14 +3,15 @@ import fire
 import logging
 import graphviz
 
-from dfdgraph.component import DataStore
+from dfdgraph import DataStore
+from dfdgraph import GLOBAL_DF
 from graph import Graph
 from rule.filter import filter_group, filter_component, filter_boundary, filter_data_store
 from dfdgraph import Diagram, Process, TrustBoundary
 from rule.aws_relation import aws_subnet_relation, aws_identify_subnet, aws_component_relation, aws_component2component
 from annotation import BoundaryGroup
+from threatparser import FlowThreat
 from utils import debug_node_list
-from itertools import combinations
 
 logging.basicConfig(level = logging.INFO)
 
@@ -141,6 +142,20 @@ def main(in_path, out_path="./output", reinit=True):
         
     diag.DrawDiagram(g)
     g.render(filename="out", format="png", view=False)
+    
+    print("Threat analyzing -----------")
+
+    # Showing threat:
+    threats = FlowThreat.read()
+    for df in GLOBAL_DF:
+        print(df.fromNode.name, "->", df.toNode.name)
+        for threat in threats:
+            if threat.check(df):
+                print("- Name", threat.threatName)
+                print("- Description", threat.description)
+                print("------")
+        print("")
+    
     
 
 if __name__ == '__main__':
