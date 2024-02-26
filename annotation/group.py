@@ -6,6 +6,7 @@ class ComponentGroup(set, Enum):
     SERVERLESS_FUNCTION = {AwsResource.LAMBDA}
     WEBAPP              = {AwsResource.AMPLIFY}
     AUTHENTICATOR       = {AwsResource.COGNITO}
+    LOAD_BALANCER       = {AwsResource.API_GATEWAY}
 
 class BoundaryGroup(set, Enum):
     VIRTUAL_NETWORK     = {AwsResource.VPC}
