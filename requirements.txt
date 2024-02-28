@@ -4,3 +4,4 @@ GitPython
 python-hcl2
 graphviz
 pytm
+pyecore
