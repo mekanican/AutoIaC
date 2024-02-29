@@ -1,11 +1,12 @@
 # import pyecore.type as xmltypes # loads default XML Types in the global registry
 from pyecore.resources import ResourceSet, URI
 from pyecore.utils import DynamicEPackage
+import os
 
-CATALOG_PATH    = "./sparta_utils/IACThreatTypeCatalog.sparta"
+CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACThreatTypeCatalog.sparta"))
 CLI_PATH        = "./sparta_utils/sparta-cli-2022.1.1-shaded.jar"
 MODEL_PATH      = "./sparta_utils/spartamodel.ecore"
-OUT_PATH        = './output/output.xmi'
+OUT_PATH        = './output/output.sparta'
 
 
 def Initialize(name = "DFD"):
