@@ -155,6 +155,9 @@ def main(in_path, out_path="./output", reinit=True):
                 print("- Description", threat.description)
                 print("------")
         print("")
+
+    print("SPARTA Exporting --------------")
+    diag.ExportSparta()
     
     
 

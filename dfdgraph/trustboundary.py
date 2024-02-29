@@ -1,5 +1,7 @@
 import graphviz
 from typing import List
+
+from sparta_utils.sparta import SpartaComponent
 from .component import DFDNode
 
 class TrustBoundary:
@@ -8,6 +10,8 @@ class TrustBoundary:
         self.name = name
         self.nodes: List[DFDNode] = []
         self.innerBoundaries: List[TrustBoundary] = []
+
+        self.spartaBoundary = SpartaComponent.TrustBoundaryContainer(name)
 
         # self.g:graphviz.Digraph = g.subgraph(name=f"cluster_{TrustBoundary.boundaryIdx}")
         self.currentIdx = TrustBoundary.boundaryIdx
@@ -28,6 +32,11 @@ class TrustBoundary:
             boundary.DrawBoundEdge(g)
     def AddNode(self, n: DFDNode):
         self.nodes.append(n)
+        self.spartaBoundary.containedElements.append(n.Get())
+
+    def Get(self):
+        return self.spartaBoundary
 
     def AddInnerBound(self, bound: "TrustBoundary"):
         self.innerBoundaries.append(bound)
+        self.spartaBoundary.containedElements.append(bound.Get())
