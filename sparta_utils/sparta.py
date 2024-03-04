@@ -48,8 +48,8 @@ class SpartaComponent:
         return SpartaComponent.root.ExternalEntity(name=name)
     
     @staticmethod
-    def DataFlow(sender, recipient):
-        return SpartaComponent.root.DataFlow(sender=sender, recipient=recipient)
+    def DataFlow(sender, recipient, name = ""):
+        return SpartaComponent.root.DataFlow(sender=sender, recipient=recipient, name=name)
     
 
 def AddElement(e):

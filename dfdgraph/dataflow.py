@@ -10,7 +10,12 @@ class DataFlow:
         self.fromNode = fromNode
         self.toNode = toNode
         self.label = label
-        self.df = SpartaComponent.DataFlow(self.fromNode.Get(), self.toNode.Get())
+        self.df = SpartaComponent.DataFlow(
+            self.fromNode.Get(), 
+            self.toNode.Get(),
+            fromNode.name + "->" + toNode.name
+        )
+        print(fromNode.name, toNode.name)
         GLOBAL_DF.append(self)
         GLOBAL_DF_SP.append(self.df)
         

@@ -140,21 +140,22 @@ def main(in_path, out_path="./output", reinit=True):
     #     pass
 
         
-    diag.DrawDiagram(g)
-    g.render(filename="out", format="png", view=False)
+    # TODO: (BUG) Cannot generate diagram & make sparta due to duplicate DataFlow
+    # diag.DrawDiagram(g)
+    # g.render(filename="out", format="png", view=False)
     
-    print("Threat analyzing -----------")
+    # print("Threat analyzing -----------")
 
-    # Showing threat:
-    threats = FlowThreat.read()
-    for df in GLOBAL_DF:
-        print(df.fromNode.name, "->", df.toNode.name)
-        for threat in threats:
-            if threat.check(df):
-                print("- Name", threat.threatName)
-                print("- Description", threat.description)
-                print("------")
-        print("")
+    # # Showing threat:
+    # threats = FlowThreat.read()
+    # for df in GLOBAL_DF:
+    #     print(df.fromNode.name, "->", df.toNode.name)
+    #     for threat in threats:
+    #         if threat.check(df):
+    #             print("- Name", threat.threatName)
+    #             print("- Description", threat.description)
+    #             print("------")
+    #     print("")
 
     print("SPARTA Exporting --------------")
     diag.ExportSparta()

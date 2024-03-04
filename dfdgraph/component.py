@@ -18,8 +18,12 @@ class DFDNode:
     def DrawEdge(self, g: graphviz.Digraph):
         for df in self.dataflow:
             df.MakeDirected(g)
-    def AddEdge(self, toNode: "DFDNode", label = ""):
-        self.dataflow.append(DataFlow(self, toNode, label))
+    def AddEdge(self, toNode: "DFDNode", label = "", refBound = None):
+        df = DataFlow(self, toNode, label)
+        self.dataflow.append(df)
+        # Not used!
+        if refBound is not None:
+            refBound.containedElements.append(df)
 
 class DataStore(DFDNode):
     def __init__(self, name=""):
