@@ -1,0 +1,57 @@
+components:
+  - group_name: VirtualMachine
+    members:
+      - name: EC2
+        tf_name: aws_instance
+
+  - group_name: ServerlessFunction
+    members:
+      - name: AwsLambda
+        tf_name: aws_lambda_function
+
+  - group_name: WebApplication
+    members:
+      - name: AwsAmplify
+        tf_name: aws_amplify_app
+  
+  - group_name: Authenticator
+    members:
+      - name: AmazonCognito
+        tf_name: aws_cognito_user_pool
+  
+  - group_name: LoadBalancer
+    members:
+      - name: APIGateway
+        tf_name: aws_api_gateway_rest_api
+
+boundaries:
+  - group_name: VirtualNetwork
+    members:
+      - name: AwsVPC
+        tf_name: aws_vpc
+
+  - group_name: VirtualFirewall
+    members:
+      - name: SecurityGroup
+        tf_name: aws_security_group
+
+  - group_name: Subnet
+    members:
+      - name: Subnet
+        tf_name: aws_subnet
+
+  - group_name: IAM
+    members:
+      - name: IAM
+        tf_name: aws_iam_instance_profile
+
+data_stores:
+  - group_name: FileStorage
+    members:
+      - name: S3
+        tf_name: aws_s3_bucket
+        
+  - group_name: Database
+    members:
+      - name: DynamoDB
+        tf_name: aws_dynamodb_table
