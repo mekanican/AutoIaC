@@ -15,7 +15,7 @@ class DataFlow:
             self.toNode.Get(),
             fromNode.name + "->" + toNode.name
         )
-        print(fromNode.name, toNode.name)
+        # print(fromNode.name, toNode.name)
         GLOBAL_DF.append(self)
         GLOBAL_DF_SP.append(self.df)
         

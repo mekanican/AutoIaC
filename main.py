@@ -62,7 +62,9 @@ def main(in_path, out_path="./output", reinit=True):
     for ds in dataStores:
         data = DataStore(ds.label)
         aws.AddNode(data)
-        diag.AddPublicNode(data)
+
+        # TODO: check is public datastore
+        # diag.AddPublicNode(data)
         node_2_dfdnode[ds] = data
 
     # Each VPC has Boundaries
@@ -132,8 +134,11 @@ def main(in_path, out_path="./output", reinit=True):
     for u in components_ds:
         for c in aws_component2component(components_ds, u, False):
             node_2_dfdnode[u].AddEdge(node_2_dfdnode[c])
-        for c in aws_component2component(components_ds, u, True):
-            node_2_dfdnode[c].AddEdge(node_2_dfdnode[u])
+            # print(u.module, u.parent, u.label, c.module, c.parent, c.label)
+        # Redundant!
+        # for c in aws_component2component(components_ds, u, True):
+        #     node_2_dfdnode[c].AddEdge(node_2_dfdnode[u])
+        #     print(c.module, c.parent, c.label, u.module, u.parent, u.label)
             
     # for u,v in combinations(components_ds, 2):
     #     aws_component2component()
@@ -141,8 +146,8 @@ def main(in_path, out_path="./output", reinit=True):
 
         
     # TODO: (BUG) Cannot generate diagram & make sparta due to duplicate DataFlow
-    # diag.DrawDiagram(g)
-    # g.render(filename="out", format="png", view=False)
+    diag.DrawDiagram(g)
+    g.render(filename="out", format="png", view=False)
     
     # print("Threat analyzing -----------")
 
@@ -157,8 +162,8 @@ def main(in_path, out_path="./output", reinit=True):
     #             print("------")
     #     print("")
 
-    print("SPARTA Exporting --------------")
-    diag.ExportSparta()
+    #print("SPARTA Exporting --------------")
+    #diag.ExportSparta()
     
     
 
