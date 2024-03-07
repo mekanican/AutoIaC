@@ -6,3 +6,4 @@ graphviz
 pytm
 pyecore
 pyyaml
+semgrep
