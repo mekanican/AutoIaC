@@ -1,2 +1,14 @@
 # 3 type of connections:
-# Forward, Backward & Common Ancestor
+# Forward, Backward & Common Ancestor / Intersect
+relations:
+  - own:
+    - id: vpc2subnet
+      first_node: VirtualNetwork # group_name
+      second_node: Subnet # group_name
+      method: Backward # 1st <- 2nd
+    - id: vm2subnet
+      first_node: Subnet
+      second_node: VirtualMachine
+      method: Backward
+  - direct_flow:
+  # Define special flow here, otherwise both Back & Forw is used

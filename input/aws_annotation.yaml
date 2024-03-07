@@ -3,6 +3,7 @@ components:
     members:
       - name: EC2
         tf_name: aws_instance
+    # TODO: Add RDS
 
   - group_name: ServerlessFunction
     members:
