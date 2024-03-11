@@ -13,16 +13,16 @@ def Initialize():
 
 INSTANCE = Initialize()
 
-def AddConnection(fromLabels: List[str], fromValues: Mapping[str, str], toLabels: List[str], toValues: Mapping[str, str]):
-    """Add connection between 2 node in neo4j database
+def CreateNode(labels: List[str], values: Mapping[str, str]) -> int:
+    """Create Node in Memgraph
 
     Args:
-        fromLabels (List[str]): list of labels for "from" node
-        fromValues (Mapping[str, str]): object for storing data of "from" node
-        toLabels (List[str]): list of labels for "to" node
-        toValues (Mapping[str, str]): object for storing data of "to" node
-    """
+        labels (List[str]): _description_
+        values (Mapping[str, str]): _description_
 
+    Returns:
+        int: _description_
+    """
     """
         Labels contain 2 value (any order is ok):
             - encoded target project's path (due to restriction in memgraph for multi-tenant db, so that every node lives in single db)
@@ -33,25 +33,34 @@ def AddConnection(fromLabels: List[str], fromValues: Mapping[str, str], toLabels
             - resource name
             - (...) additional value to be added later
     """
-    
     crafted_params = {
-        "fl1" : fromLabels[0],
-        "fl2" : fromLabels[1],
-        "fpid": fromValues["parent_id"],
-        "frt": fromValues["resource_type"],
-        "frn": fromValues["resource_name"],
-
-        "tl1" : toLabels[0],
-        "tl2" : toLabels[1],
-        "tpid": toValues["parent_id"],
-        "trt": toValues["resource_type"],
-        "trn": toValues["resource_name"],
+        "l1" : labels[0],
+        "l2" : labels[1],
+        "pid": values["parent_id"],
+        "rt": values["resource_type"],
+        "rn": values["resource_name"],
     }
 
-    records, summary, keys = INSTANCE.execute_query(
-        "CREATE (u:$fl1:$fl2 {parent: $fpid, type: $frt, name: $frn}) -[:REF]-> (v:$tl1:$tl2 {parent: $tpid, type: $trt, name: $trn}))",
-        parameters_=crafted_params,
-        database_="memgraph"
+    records, _, _ = INSTANCE.execute_query(
+        "CREATE (u:$l1:$l2 {parent: $pid, type: $rt, name: $rn}) RETURN ID(u) as id;",
+        parameters_=crafted_params
     )
     
-    pass
+    return records[0]["id"]
+
+def AddConnection(fromId, targetId):
+    """Add connection between 2 node in neo4j database
+    """
+
+
+    records, summary, keys = INSTANCE.execute_query(
+        """
+            MATCH (c1), (c2)
+            WHERE ID(c1) = $id1 AND ID(c2) = $id2
+            CREATE (c1)-[r:REF]->(c2)
+            RETURN r;
+        """,
+        id1 = fromId,
+        id2 = targetId,
+        database_="memgraph"
+    )
