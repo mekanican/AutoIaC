@@ -2,7 +2,6 @@ import graphviz
 
 from sparta_utils.sparta import SpartaComponent
 
-GLOBAL_DF = []
 GLOBAL_DF_SP = []
 
 class DataFlow:
@@ -16,7 +15,6 @@ class DataFlow:
             fromNode.name + "->" + toNode.name
         )
         # print(fromNode.name, toNode.name)
-        GLOBAL_DF.append(self)
         GLOBAL_DF_SP.append(self.df)
         
     def MakeDirected(self, g: graphviz.Digraph):

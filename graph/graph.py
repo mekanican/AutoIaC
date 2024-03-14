@@ -1,6 +1,6 @@
 from typing import List
 from os import environ
-from utils.n4j_helper import AddConnection, CreateNode
+from utils.n4j_helper import AddConnection, CreateNode, GetPathID
 import os
 import json
 
@@ -35,7 +35,7 @@ def LoadFromFolder(filePath: str, init=True):
     """
 
     # TODO: Make this working other OS
-    encoded_path = '.'.join(str(os.path.abspath(filePath))[1:].split('/'))
+    encoded_path = GetPathID(filePath)
 
 
     
@@ -83,6 +83,7 @@ def LoadFromFolder(filePath: str, init=True):
             target
         )
             
+    return encoded_path
 
 
 if __name__ == "__main__":
