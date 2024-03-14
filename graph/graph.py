@@ -1,7 +1,5 @@
-from typing import List
 from os import environ
 from utils.n4j_helper import AddConnection, CreateNode, GetPathID
-import os
 import json
 
 def LoadFromFolder(filePath: str, init=True):
@@ -80,12 +78,8 @@ def LoadFromFolder(filePath: str, init=True):
 
         AddConnection(
             source,
-            target
+            target,
+            encoded_path
         )
             
     return encoded_path
-
-
-if __name__ == "__main__":
-    LoadFromFolder("../cloud_s3/terraform", False)
-    pass

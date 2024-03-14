@@ -1,4 +1,4 @@
-components:
+processes:
   - group_name: VirtualMachine
     members:
       - name: EC2

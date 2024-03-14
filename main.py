@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import json
 import fire
 import logging
 import graphviz
@@ -6,7 +7,8 @@ import graphviz
 from dfdgraph import DataStore
 from graph import LoadFromFolder
 from dfdgraph import Diagram, Process, TrustBoundary
-from utils.n4j_helper import GetPathID
+from tfparser.tfgrep import GetSemgrepJSON
+from utils.n4j_helper import CleanUp, CompressNode, GetListParent, GetPathID, QueryGroup, QueryTagged, TaggingNode, TaggingPublic
 from utils.yaml_importer import print_object, read_config
 
 logging.basicConfig(level = logging.INFO)
@@ -23,10 +25,61 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     print("RULE")
     print_object(rule)
 
-    # Getting path id
-    pathID = LoadFromFolder(in_path)
+    # Process compressed first
 
+    compresses = \
+        [m["tf_name"] for c in anno["processes"] for m in c["members"] if m.get("compress", False)] + \
+        [m["tf_name"] for c in anno["data_stores"] for m in c["members"] if m.get("compress", False)]
+    
+
+    # Cleaning up (FOR DEBUGGING ONLY)
+    CleanUp()
+
+    # Getting path id
+    pathID = LoadFromFolder(in_path, init=reinit)
+    print("-----")
+
+    parents = GetListParent(pathID)
+    print(parents)
+    print(compresses)
+    for parent in parents:
+        for compress in compresses:
+            logging.info(f"Process {compress} in {parent}")
+            CompressNode(compress, parent, pathID)
+            
+    for key in anno:
+        for c in anno[key]:
+            for member in c["members"]:
+                TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key)
+
+    sem_json = json.load(open(GetSemgrepJSON(in_path, sem_rule), "r"))
+    list_of_public_subnet = set([result["extra"]["metavars"]["$SN_NAME"]["abstract_content"] for result in sem_json["results"]])
+    logging.info(f"Public subnet {list_of_public_subnet}")
+    for subnet in list_of_public_subnet:
+        TaggingPublic(pathID, subnet)
+
+        
+    # for relation in rule["relations"]["own"]:
+    #     first = relation["first_node"]
+    #     second = relation["second_node"]
+    #     method = relation["method"]
+
+    #     result = QueryGroup(pathID, first, second)
+    #     for r in result:
+
+    #         pass
+    #     pass
+    
+    diag = Diagram()
+    aws = TrustBoundary("AWS")
+    diag.AddBoundary(aws)
+    diag.ExportSparta()
+            
     exit(0)
+
+    # PHASE 1: EXTRACT BARE COMPONENT (PROCESS + DATA STORE)
+    
+
     
     # g = LoadFromFolder(in_path, reinit)
 
