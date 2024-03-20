@@ -12,7 +12,7 @@ class Diagram:
         self.boundaries: List[TrustBoundary] = []
 
     def ExportSparta(self):
-        user = ExternalEntity("User")
+        user = ExternalEntity("", "User")
         
         for node in self.publicNodes:
             user.AddEdge(node)
@@ -29,7 +29,7 @@ class Diagram:
 
     def DrawDiagram(self, g: graphviz.Digraph):
         # Special node representates User
-        user = ExternalEntity("User")
+        user = ExternalEntity("", "User")
         # Connect to all public node
         # !TODO: Assume User has bidirectional data flow to those node
         for node in self.publicNodes:

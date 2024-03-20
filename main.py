@@ -16,7 +16,7 @@ from utils.yaml_importer import print_object, read_config
 logging.basicConfig(level = logging.INFO)
 
 
-def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", out_path="./output", reinit=True):
+def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", out_path="./output", reinit=True, graph_mode=False):
     print(f"Reading {in_path}, Writing to {out_path}")
 
     anno = read_config(anno_path)
@@ -148,7 +148,12 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         
     # Fill with connections
     
-    diag.ExportSparta()
+    if graph_mode:
+        g = graphviz.Digraph("G", directory="output", filename="result.dot")
+        diag.DrawDiagram(g)
+        g.render(filename="out", format="png", view=False)
+    else:
+        diag.ExportSparta()
 
             
 

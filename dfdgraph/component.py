@@ -12,7 +12,7 @@ class DFDNode:
         if id == "":
             self.id = get_random_id()
         else:
-            self.id = id
+            self.id = str(id)
         COMPONENT_ID_NODE[self.id] = self
         self.dataflow: List[DataFlow] = []
         self.spartaInstance = None
