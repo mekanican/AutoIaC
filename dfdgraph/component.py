@@ -1,13 +1,19 @@
 import graphviz
-from typing import List
+from typing import List, Mapping
 from sparta_utils.sparta import SpartaComponent
 from utils import get_random_id
 from .dataflow import DataFlow
 
+COMPONENT_ID_NODE: Mapping[str, "DFDNode"] = {}
+
 class DFDNode:
-    def __init__(self, name):
+    def __init__(self, id, name):
         self.name = name
-        self.id = get_random_id()
+        if id == "":
+            self.id = get_random_id()
+        else:
+            self.id = id
+        COMPONENT_ID_NODE[self.id] = self
         self.dataflow: List[DataFlow] = []
         self.spartaInstance = None
     def DrawNode(self, g: graphviz.Digraph): # Virtual function
@@ -26,8 +32,8 @@ class DFDNode:
             refBound.containedElements.append(df)
 
 class DataStore(DFDNode):
-    def __init__(self, name=""):
-        super().__init__(name)
+    def __init__(self, id, name=""):
+        super().__init__(id, name)
     def DrawNode(self, g: graphviz.Digraph):
         # g.attr("node", shape="cylinder")
         g.node(self.id, self.name, shape="cylinder")
@@ -38,8 +44,8 @@ class DataStore(DFDNode):
         return self.spartaInstance
 
 class Process(DFDNode):
-    def __init__(self, name=""):
-        super().__init__(name)
+    def __init__(self, id, name=""):
+        super().__init__(id, name)
     def DrawNode(self, g: graphviz.Digraph):
         g.node(self.id, self.name, shape="ellipse")
     def Get(self):
@@ -48,8 +54,8 @@ class Process(DFDNode):
         return self.spartaInstance
 
 class ExternalEntity(DFDNode):
-    def __init__(self, name=""):
-        super().__init__(name)
+    def __init__(self, id, name=""):
+        super().__init__(id, name)
     def DrawNode(self, g: graphviz.Digraph):
         g.node(self.id, self.name, shape="box")
     def Get(self):

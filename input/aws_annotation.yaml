@@ -13,6 +13,7 @@ processes:
     members:
       - name: AwsAmplify
         tf_name: aws_amplify_\w*
+        compress: true
   
   - group_name: Authenticator
     members:
@@ -26,26 +27,27 @@ processes:
         tf_name: aws_api_gateway_\w*
         compress: true
 
+  - group_name: VirtualFirewall
+    members:
+      - name: SecurityGroup
+        tf_name: aws_security_group
+
+  - group_name: IAM
+    members:
+      - name: IAM
+        tf_name: aws_iam_instance_profile
+
 boundaries:
   - group_name: VirtualNetwork
     members:
       - name: AwsVPC
         tf_name: aws_vpc
 
-  - group_name: VirtualFirewall
-    members:
-      - name: SecurityGroup
-        tf_name: aws_security_group
-
   - group_name: Subnet
     members:
       - name: Subnet
         tf_name: aws_subnet
-
-  - group_name: IAM
-    members:
-      - name: IAM
-        tf_name: aws_iam_instance_profile
+        compress: true
 
 data_stores:
   - group_name: FileStorage

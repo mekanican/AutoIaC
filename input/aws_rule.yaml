@@ -2,7 +2,7 @@
 # Forward, Backward & Common Ancestor / Intersect
 relations:
   own:
-    - id: vpc2subnet
+    - id: subnet2vpc
       first_node: VirtualNetwork # group_name
       second_node: Subnet # group_name
       method: Backward # 1st <- 2nd
@@ -14,5 +14,23 @@ relations:
       first_node: Subnet
       second_node: Database
       method: Backward
+    - id: vf2subnet
+      first_node: Subnet
+      second_node: VirtualFirewall
+      method: Backward
+
+    - id: vm2vpc
+      first_node: VirtualNetwork
+      second_node: VirtualMachine
+      method: Backward
+    - id: db2vpc
+      first_node: VirtualNetwork
+      second_node: Database
+      method: Backward
+    - id: vf2vpc
+      first_node: VirtualNetwork
+      second_node: VirtualFirewall
+      method: Backward
+
   direct_flow: []
   # Define special flow here, otherwise both Back & Forw is used

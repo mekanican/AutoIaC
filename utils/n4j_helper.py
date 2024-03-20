@@ -129,22 +129,11 @@ def CompressNode(regexName: str, parentID:str, pathID: str):
         nodeid=representative,
         database_="memgraph"
     )
-    # REMOVE ISOLATED
-    INSTANCE.execute_query(
-        """
-            MATCH (u:$id)
-            WHERE ID(u) in $list AND not exists((u)-[]-())
-            DETACH DELETE u;
-        """,
-        id=pathID,
-        list=node_ids,
-        database_="memgraph"
-    )
     
     records, _, _ = INSTANCE.execute_query(
         """
             MATCH (u:$id:resource), (v:$id:resource), (k:$id:resource:compressed), f=(s:$id)-[]->(u), g=(v)-[]->(d:$id)
-            WHERE NOT u:compressed AND NOT v:compressed AND ID(u) in $list AND ID(v) in $list AND NOT ID(s) in $list AND NOT ID(d) in $list AND ID(k)=$nodeid
+            WHERE NOT (u:compressed) AND NOT (v:compressed) AND ID(u) in $list AND ID(v) in $list AND NOT ID(s) in $list AND NOT ID(d) in $list AND ID(k)=$nodeid
             DETACH DELETE u,v
 
             WITH k, collect(s) as cs, collect(d) as cd
@@ -157,6 +146,18 @@ def CompressNode(regexName: str, parentID:str, pathID: str):
         id = pathID,
         regex=regexName,
         nodeid=representative,
+        list=node_ids,
+        database_="memgraph"
+    )
+
+    # CLEANUP uncompressed
+    INSTANCE.execute_query(
+        """
+            MATCH (u:$id)
+            WHERE ID(u) in $list AND not (u:compressed)
+            DETACH DELETE u;
+        """,
+        id=pathID,
         list=node_ids,
         database_="memgraph"
     )
@@ -206,7 +207,7 @@ def QueryTagged(pathID: str, group: str):
     records, _, _ = INSTANCE.execute_query(
         """
             MATCH (u:$id:tagged:$group)
-            RETURN u.id as id, u.group as group, u.general_name as general_name
+            RETURN ID(u) as id, u.group as group, u.general_name as general_name
         """,
         id=pathID,
         group=group,
@@ -219,11 +220,84 @@ def QueryGroup(pathID: str, group: str, group2: str):
         """
             MATCH (u:$id:tagged)<-[r]-(v:$id:tagged)
             WHERE u.group = $group AND v.group = $group2
-            RETURN u, r, v
+            RETURN u.id as id1, u.general_name as general_name1, v.id as id2, v.general_name as general_name2
         """,
         id=pathID,
         group=group,
         group2=group2,
         database_="memgraph"
+    )
+    return records
+
+    
+def RemovePublicBoundaries(pathID: str):
+    INSTANCE.execute_query(
+    """
+        MATCH (u:$id:tagged:boundaries:public)<-[]-(s:$id), (u)-[]->(d:$id)
+        DETACH DELETE u
+        WITH collect(s) as cs, collect(d) as cd
+        UNWIND cs as ucs
+        UNWIND cd as ucd
+        MERGE (ucs)-[:REF]->(ucd)
+        RETURN *
+    """,
+    id = pathID,
+    database_="memgraph"
+    )
+
+def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
+    if method == "Backward":
+        chain = "<-[]-"
+        return f"""
+            MATCH (u:$id:tagged) {chain} (v:$id:tagged)
+            WHERE u.group='{firstNode}' AND v.group='{secondNode}'
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
+        """
+        pass
+    elif method == "Forward":
+        chain = "-[]->"
+        return f"""
+            MATCH (u:$id:tagged) {chain} (v:$id:tagged)
+            WHERE u.group='{firstNode}' AND v.group='{secondNode}'
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
+        """
+        pass
+    elif method == "IntersectForward":
+        chain = "-[]->"
+        pass
+    elif method == "IntersectBackward":
+        chain = "<-[]-"
+        pass
+
+    raise NotImplementedError
+
+def FindOwn(firstNode: str, secondNode: str, method: str, pathID: str):
+    records, _, _ = INSTANCE.execute_query(OwnRuleToQuery(firstNode, secondNode, method), 
+                                           id = pathID,
+                                           database_="memgraph")
+    return records
+    pass
+
+def QueryOutermostBoundary(pathID:str):
+    records, _, _ = INSTANCE.execute_query(
+    """
+        MATCH (u:$id:tagged:boundaries), (v:$id:tagged:boundaries)
+        WHERE NOT exists((u)<-[*]-(v))
+        RETURN ID(u) as id, u.group as group, u.general_name as general_name
+    """,
+    id=pathID,
+    database_="memgraph"
+    )
+    return records
+
+def QueryAllConnectionResource(pathID: str):
+    records, _, _ = INSTANCE.execute_query(
+    """
+    MATCH (u:$id:tagged:resource) -[]-> (v:$id:tagged:resource)
+    WHERE ((u:processes) OR (u:data_stores)) AND ((v:processes) OR (v:data_stores))
+    RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
+    """,
+    id=pathID,
+    database_="memgraph"
     )
     return records
