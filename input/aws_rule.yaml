@@ -34,3 +34,6 @@ relations:
 
   direct_flow: []
   # Define special flow here, otherwise both Back & Forw is used
+publics:
+  - id: publicsubnet
+    variable: $SN_NAME

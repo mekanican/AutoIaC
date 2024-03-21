@@ -207,7 +207,7 @@ def QueryTagged(pathID: str, group: str):
     records, _, _ = INSTANCE.execute_query(
         """
             MATCH (u:$id:tagged:$group)
-            RETURN ID(u) as id, u.group as group, u.general_name as general_name
+            RETURN ID(u) as id, u.group as group, u.general_name as general_name, u.type as name
         """,
         id=pathID,
         group=group,
@@ -247,19 +247,19 @@ def RemovePublicBoundaries(pathID: str):
 
 def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
     if method == "Backward":
-        chain = "<-[]-"
+        chain = "<-[*]-"
         return f"""
-            MATCH (u:$id:tagged) {chain} (v:$id:tagged)
+            MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2
         """
         pass
     elif method == "Forward":
-        chain = "-[]->"
+        chain = "-[*]->"
         return f"""
-            MATCH (u:$id:tagged) {chain} (v:$id:tagged)
+            MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2
         """
         pass
     elif method == "IntersectForward":
@@ -278,11 +278,12 @@ def FindOwn(firstNode: str, secondNode: str, method: str, pathID: str):
     return records
     pass
 
+# TODO: double check the direction
 def QueryOutermostBoundary(pathID:str):
     records, _, _ = INSTANCE.execute_query(
     """
-        MATCH (u:$id:tagged:boundaries), (v:$id:tagged:boundaries)
-        WHERE NOT exists((u)<-[*]-(v))
+        MATCH (u:$id:tagged:boundaries)
+        WHERE NOT exists((u)-[*]->(:$id:tagged:boundaries))
         RETURN ID(u) as id, u.group as group, u.general_name as general_name
     """,
     id=pathID,
@@ -293,7 +294,7 @@ def QueryOutermostBoundary(pathID:str):
 def QueryAllConnectionResource(pathID: str):
     records, _, _ = INSTANCE.execute_query(
     """
-    MATCH (u:$id:tagged:resource) -[]-> (v:$id:tagged:resource)
+    MATCH (u:$id:tagged:resource) -[*]-> (v:$id:tagged:resource)
     WHERE ((u:processes) OR (u:data_stores)) AND ((v:processes) OR (v:data_stores))
     RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
     """,

@@ -33,6 +33,10 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         [m["tf_name"] for c in anno["processes"] for m in c["members"] if m.get("compress", False)] + \
         [m["tf_name"] for c in anno["data_stores"] for m in c["members"] if m.get("compress", False)]
     
+    publics = set(
+        [m["tf_name"] for c in anno["processes"] for m in c["members"] if m.get("can_public", False)] + \
+        [m["tf_name"] for c in anno["data_stores"] for m in c["members"] if m.get("can_public", False)]
+    )
 
     # Cleaning up (FOR DEBUGGING ONLY)
     CleanUp()
@@ -55,10 +59,13 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key)
 
     sem_json = json.load(open(GetSemgrepJSON(in_path, sem_rule), "r"))
-    list_of_public_subnet = set([result["extra"]["metavars"]["$SN_NAME"]["abstract_content"] for result in sem_json["results"]])
-    logging.info(f"Public subnet {list_of_public_subnet}")
-    for subnet in list_of_public_subnet:
-        TaggingPublic(pathID, subnet)
+    for v in rule["publics"]:
+        name = v["variable"]
+
+        list_of_public_bound = set([result["extra"]["metavars"][name]["abstract_content"] for result in sem_json["results"]])
+        logging.info(f"Public boundary {list_of_public_bound}")
+        for bound in list_of_public_bound:
+            TaggingPublic(pathID, bound)
 
     RemovePublicBoundaries(pathID)
 
@@ -66,12 +73,11 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     dsname = set(c["group_name"] for c in anno["data_stores"])
     boundname = set(c["group_name"] for c in anno["boundaries"])
 
-    ids = set()
-
     logging.info("List of Boundaries")
     
     bounds = set()
     compos = set()
+    diag = Diagram()
     
     for r in QueryTagged(pathID, "boundaries"):
         id_ = str(r["id"])
@@ -95,23 +101,41 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
 
                 
             if u["group2"] in boundname:
+                if u["id1"] in BOUNDARY_ID_NODE and u["id2"] in BOUNDARY_ID_NODE:
+                    continue
                 to = BOUNDARY_ID_NODE.get(str(u["id2"]), TrustBoundary(u["id2"], crafted_name2))
-                to.AddNode(fr)
-                bounds.add(to)
-                compos.add(fr)
+                if u["group1"] not in boundname:
+                    to.AddNode(fr)
+                    bounds.add(to)
+                    compos.add(fr)
+                    if u["name1"] in publics:
+                        diag.AddPublicNode(fr)
+                else:
+                    fr.AddInnerBound(to)
+                    bounds.add(to)
+                    bounds.add(fr)
             elif u["group2"] in procname:
+                if u["id1"] in BOUNDARY_ID_NODE and u["id2"] in COMPONENT_ID_NODE:
+                    continue
                 to = COMPONENT_ID_NODE.get(str(u["id2"]), Process(u["id2"], crafted_name2))
                 fr.AddNode(to)
                 bounds.add(fr)
                 compos.add(to)
+                # if u["name2"] in publics:
+                #     diag.AddPublicNode(to)
             elif u["group2"] in dsname:
-                to = COMPONENT_ID_NODE.get(str(u["id2"]), DataStore(u["id2"], crafted_name1))
+                if u["id1"] in BOUNDARY_ID_NODE and u["id2"] in COMPONENT_ID_NODE:
+                    continue
+                to = COMPONENT_ID_NODE.get(str(u["id2"]), DataStore(u["id2"], crafted_name2))
                 fr.AddNode(to)
                 bounds.add(fr)
                 compos.add(to)
+                # if u["name2"] in publics:
+                #     diag.AddPublicNode(to)
+            logging.info(type(fr).__name__ + str(fr.name))
+            logging.info(type(to).__name__ + str(to.name))
 
     # Add boundaries to graph
-    diag = Diagram()
     aws = TrustBoundary("", "AWS")
     diag.AddBoundary(aws)
 
@@ -122,10 +146,13 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         crafted_name = "%s (%s)" % (r["group"], r["general_name"])
         logging.info(f"{id_} - {crafted_name}")
         if r["group"] in procname:
-            aws.AddNode(COMPONENT_ID_NODE.get(id_, Process(id_, crafted_name)))
+            n = COMPONENT_ID_NODE.get(id_, Process(id_, crafted_name))
         else:
-            aws.AddNode(COMPONENT_ID_NODE.get(id_, DataStore(id_, crafted_name)))
+            n = COMPONENT_ID_NODE.get(id_, DataStore(id_, crafted_name))
+        aws.AddNode(n)
         logging.info(crafted_name)    
+        if r["name"] in publics:
+            diag.AddPublicNode(n)
 
 
 

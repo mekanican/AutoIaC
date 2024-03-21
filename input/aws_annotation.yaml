@@ -10,6 +10,7 @@ processes:
     members:
       - name: AwsLambda
         tf_name: aws_lambda_function
+        can_public: true
 
   - group_name: WebApplication
     acctp_name: CloudApplication 
@@ -31,18 +32,21 @@ processes:
       - name: APIGateway
         tf_name: aws_api_gateway_\w*
         compress: true
+        can_public: true
 
   - group_name: VirtualFirewall
     acctp_name: CloudApplication 
     members:
       - name: SecurityGroup
         tf_name: aws_security_group
+        can_public: true
 
   - group_name: IAM
     acctp_name: CloudApplication 
     members:
       - name: IAM
         tf_name: aws_iam_instance_profile
+        can_public: true
 
 boundaries:
   - group_name: VirtualNetwork
@@ -61,6 +65,7 @@ data_stores:
     members:
       - name: S3
         tf_name: aws_s3_bucket
+        can_public: true
         
   - group_name: Database
     members:
