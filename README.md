@@ -64,7 +64,7 @@ data_stores:
 ```
 
 ## Ruleset structure
-- Contain 3 main keys: `relations` and `publics`. The configuration must contain all of these keys.
+- Contain 2 main keys: `relations` and `publics`. The configuration must contain all of these keys.
 ```yaml
 relations:
     # ...
