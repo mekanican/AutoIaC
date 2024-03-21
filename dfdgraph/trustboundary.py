@@ -1,17 +1,26 @@
 import graphviz
-from typing import List
+from typing import List, Mapping
 
 from sparta_utils.sparta import SpartaComponent
+from utils.random_tmp import get_random_id
 from .component import DFDNode
+
+BOUNDARY_ID_NODE: Mapping[str, "TrustBoundary"] = {}
 
 class TrustBoundary:
     boundaryIdx = 0
-    def __init__(self, name = ""):
+    def __init__(self, id, name = ""):
         self.name = name
         self.nodes: List[DFDNode] = []
         self.innerBoundaries: List[TrustBoundary] = []
 
         self.spartaBoundary = SpartaComponent.TrustBoundaryContainer(name)
+
+        if id == "":
+            self.id = get_random_id()
+        else:
+            self.id = id
+        BOUNDARY_ID_NODE[self.id] = self
 
         # self.g:graphviz.Digraph = g.subgraph(name=f"cluster_{TrustBoundary.boundaryIdx}")
         self.currentIdx = TrustBoundary.boundaryIdx

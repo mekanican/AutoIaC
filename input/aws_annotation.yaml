@@ -1,0 +1,76 @@
+processes:
+  - group_name: VirtualMachine
+    acctp_name: VirtualMachine 
+    members:
+      - name: EC2
+        tf_name: aws_instance
+
+  - group_name: ServerlessFunction
+    acctp_name: CloudApplication 
+    members:
+      - name: AwsLambda
+        tf_name: aws_lambda_function
+        can_public: true
+
+  - group_name: WebApplication
+    acctp_name: CloudApplication 
+    members:
+      - name: AwsAmplify
+        tf_name: aws_amplify_\w*
+        compress: true
+  
+  - group_name: Authenticator
+    acctp_name: CloudApplication 
+    members:
+      - name: AmazonCognito
+        tf_name: aws_cognito_((user)|(identity))_pool
+        compress: true
+  
+  - group_name: LoadBalancer
+    acctp_name: CloudApplication 
+    members:
+      - name: APIGateway
+        tf_name: aws_api_gateway_\w*
+        compress: true
+        can_public: true
+
+  - group_name: VirtualFirewall
+    acctp_name: CloudApplication 
+    members:
+      - name: SecurityGroup
+        tf_name: aws_security_group
+        can_public: true
+
+  - group_name: IAM
+    acctp_name: CloudApplication 
+    members:
+      - name: IAM
+        tf_name: aws_iam_instance_profile
+        can_public: true
+
+boundaries:
+  - group_name: VirtualNetwork
+    members:
+      - name: AwsVPC
+        tf_name: aws_vpc
+
+  - group_name: Subnet
+    members:
+      - name: Subnet
+        tf_name: aws_subnet
+        compress: true
+
+data_stores:
+  - group_name: FileStorage
+    members:
+      - name: S3
+        tf_name: aws_s3_bucket
+        can_public: true
+        
+  - group_name: Database
+    members:
+      - name: DynamoDB
+        tf_name: aws_dynamodb_table
+      - name: RDS
+        tf_name: aws_((db_instance)|(rds_cluster))
+        compress: true

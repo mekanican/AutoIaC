@@ -1,1 +1,0 @@
-from .threat import ActorType, FlowThreat

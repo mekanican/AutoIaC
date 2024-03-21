@@ -5,3 +5,5 @@ python-hcl2
 graphviz
 pytm
 pyecore
+pyyaml
+semgrep
