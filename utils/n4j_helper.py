@@ -295,7 +295,9 @@ def QueryAllConnectionResource(pathID: str):
     records, _, _ = INSTANCE.execute_query(
     """
     MATCH (u:$id:tagged:resource) -[*]-> (v:$id:tagged:resource)
-    WHERE ((u:processes) OR (u:data_stores)) AND ((v:processes) OR (v:data_stores))
+    WHERE ((u:processes) OR (u:data_stores)) AND ((v:processes) OR (v:data_stores)) AND 
+        NOT exists ((u)-[*]->(:$id:tagged:resource:processes)-[*]->(v)) AND
+        NOT exists ((u)-[*]->(:$id:tagged:resource:data_stores)-[*]->(v))
     RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2
     """,
     id=pathID,
