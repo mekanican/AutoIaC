@@ -74,3 +74,9 @@ data_stores:
       - name: RDS
         tf_name: aws_((db_instance)|(rds_cluster))
         compress: true
+
+external_entities:
+  - name: User
+    annotation: RemoteUser
+  - name: Mobile
+    annotation: ExternalService

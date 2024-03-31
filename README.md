@@ -30,12 +30,12 @@ go install github.com/pcasteran/terraform-graph-beautifier@latest
 
 By default, program will seek for terraform executable, if you want to run the program with OpenTofu, use:
 ```bash
-    TOFU=1; ./main.py ... # in bash
+    TOFU=1 ./main.py ... # in bash
     set -x TOFU 1; ./main.py ... # in fish
 ```
 ---
 ## Annotation structure
-- Contain 3 main keys: `processes`, `boundaries` and `data_stores`. The configuration must contain all of these keys.
+- Contain 4 main keys: `processes`, `boundaries`, `data_stores` and `external_entities`. The configuration must contain all of these keys.
 ```yaml
 processes:
     # ...
@@ -43,7 +43,10 @@ boundaries:
     # ...
 data_stores:
     # ...
+external_entities:
+    # ...
 ``` 
+- `external_entities` contains an array of external entities that should represent in the graph. Each element has 2 keys: `name` and `annotation`, to give name and annotation to External Entity in final DFD
 - Each key contains an array of info about group and its members. Info structure is the same for process, boundary and data store, there are 3 keys to fulfill: `group_name`, `annotation` and `members`. This is where you annotate the terraform resource in to group and showed name on DFD 
 ```yaml
     - group_name: VirtualMachine # Name of the group

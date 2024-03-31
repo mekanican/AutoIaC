@@ -54,6 +54,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
             CompressNode(compress, parent, pathID)
             
     for key in anno:
+        if key == "external_entities":
+            continue
         for c in anno[key]:
             for member in c["members"]:
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
@@ -177,10 +179,10 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     
     if graph_mode:
         g = graphviz.Digraph("G", directory=out_path, filename="result.dot")
-        diag.DrawDiagram(g)
+        diag.DrawDiagram(g, anno["external_entities"])
         g.render(filename="dfd", format="png", view=False)
     else:
-        diag.ExportSparta(out_path)
+        diag.ExportSparta(out_path, anno["external_entities"])
 
     
 

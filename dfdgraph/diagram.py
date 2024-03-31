@@ -11,14 +11,17 @@ class Diagram:
         self.publicNodes: List[DFDNode] = []
         self.boundaries: List[TrustBoundary] = []
 
-    def ExportSparta(self, path=""):
-        user = ExternalEntity("", "User", "RemoteUser")
+    def ExportSparta(self, path, external_entities):
+        # ee = ExternalEntity("", "User", "RemoteUser")
+        ee_list = [ExternalEntity("", ee["name"], ee["annotation"]) for ee in external_entities]
         
         for node in self.publicNodes:
-            user.AddEdge(node)
-            node.AddEdge(user)
+            for ee in ee_list:
+                ee.AddEdge(node)
+                node.AddEdge(ee)
 
-        AddElement(user.Get())
+        for ee in ee_list:
+            AddElement(ee.Get())
         for bound in self.boundaries:
             AddElement(bound.Get())
         
@@ -27,22 +30,25 @@ class Diagram:
 
         Export(path + "/output.sparta")
 
-    def DrawDiagram(self, g: graphviz.Digraph):
+    def DrawDiagram(self, g: graphviz.Digraph, external_entities):
         # Special node representates User
-        user = ExternalEntity("", "User")
+        ee_list = [ExternalEntity("", ee["name"], ee["annotation"]) for ee in external_entities]
         # Connect to all public node
         # !TODO: Assume User has bidirectional data flow to those node
         for node in self.publicNodes:
-            user.AddEdge(node)
-            node.AddEdge(user)
+            for ee in ee_list:
+                ee.AddEdge(node)
+                node.AddEdge(ee)
 
         # Separating node and edge draw (graphviz bug)
-        user.DrawNode(g)
+        for ee in ee_list:
+            ee.DrawNode(g)
         for bound in self.boundaries:
             print(f"In diag: {bound.name}")
             bound.DrawBoundNode(g)
 
-        user.DrawEdge(g)
+        for ee in ee_list:
+            ee.DrawEdge(g)
         for bound in self.boundaries:
             bound.DrawBoundEdge(g)
 
