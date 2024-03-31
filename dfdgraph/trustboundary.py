@@ -19,7 +19,7 @@ class TrustBoundary:
         if id == "":
             self.id = get_random_id()
         else:
-            self.id = id
+            self.id = str(id)
         BOUNDARY_ID_NODE[self.id] = self
 
         # self.g:graphviz.Digraph = g.subgraph(name=f"cluster_{TrustBoundary.boundaryIdx}")
@@ -33,6 +33,7 @@ class TrustBoundary:
                 node.DrawNode(sg)
                 # node.DrawEdge(sg)
             for boundary in self.innerBoundaries:
+                print(f"In {self.name}: {boundary.name}")
                 boundary.DrawBoundNode(sg)
     def DrawBoundEdge(self, g:graphviz.Digraph):
         for node in self.nodes:

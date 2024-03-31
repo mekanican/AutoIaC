@@ -2,8 +2,11 @@
 
 [Lateral Movement]
 Malicious content upload, Attackers may use storage services to store a malicious program or toolset that will be executed at later times during their operation. In addition, adversaries may exploit the trust between users and their organization’s Storage services by storing phishing content. Furthermore, storage services can be leveraged to park gathered intelligence that will be exfiltrated when terms suit the actor group.
+
 Trigger cross-service interaction, Attackers may manipulate storage services to trigger a compute service, like Azure Functions, where an attacker already has a foothold on a storage container and can inject a blob that will initiate a chain of a compute process. This may allow an attacker to infiltrate another resource and cause harm.
+
 Code injection, Benign code stored on a storage service may be tainted by adding malicious programs, scripts, or exploit code to otherwise valid files. Upon execution of the tainted code by a legitimate user, the malicious portion runs the adversary’s code on a remote system. Attackers may use tainted code to move laterally from the executing host. Same is applicable for data blobs or files which may be eventually processed on a host by a legitimate application with software vulnerabilities. Attackers may tamper benign data with a payload that exploits a vulnerability on a user's end and execute a malicious code.
+
 
 [Reconnaissance]
 Storage account discovery, Attackers may execute active reconnaissance scans to gather storage account names that becomes a potential target. Active scans are those where the adversary probes victim infrastructure via network traffic, as opposed to other forms of reconnaissance that do not involve direct interaction.

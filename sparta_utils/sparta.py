@@ -3,7 +3,8 @@ from pyecore.resources import ResourceSet, URI
 from pyecore.utils import DynamicEPackage
 import os
 
-CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACThreatTypeCatalog.sparta"))
+# CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACThreatTypeCatalog.sparta"))
+CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACNewCatalog.sparta"))
 CLI_PATH        = "./sparta_utils/sparta-cli-2022.1.1-shaded.jar"
 MODEL_PATH      = "./sparta_utils/spartamodel.ecore"
 OUT_PATH        = './output/output.sparta'
@@ -36,16 +37,29 @@ class SpartaComponent:
         return SpartaComponent.root.TrustBoundaryContainer(name=name)
     
     @staticmethod
-    def Process(name=""):
-        return SpartaComponent.root.Process(name=name)
+    def Process(name="", anno=""):
+        p = SpartaComponent.root.Process(name=name)
+        p.annotations.append(
+            SpartaComponent.root.ModelElementAnnotation(value=anno)
+        )
+        return p
 
     @staticmethod
-    def DataStore(name=""):
-        return SpartaComponent.root.DataStore(name=name)
+    def DataStore(name="", anno=""):
+        p = SpartaComponent.root.DataStore(name=name)
+
+        p.annotations.append(
+            SpartaComponent.root.ModelElementAnnotation(value=anno)
+        )
+        return p
     
     @staticmethod
-    def ExternalEntity(name=""):
-        return SpartaComponent.root.ExternalEntity(name=name)
+    def ExternalEntity(name="", anno=""):
+        p = SpartaComponent.root.ExternalEntity(name=name)
+        p.annotations.append(
+            SpartaComponent.root.ModelElementAnnotation(value=anno)
+        )
+        return p
     
     @staticmethod
     def DataFlow(sender, recipient, name = ""):
@@ -55,8 +69,10 @@ class SpartaComponent:
 def AddElement(e):
     STATIC_INSTANCE[1].containedElements.append(e)
 
-def Export():
-    output = STATIC_INSTANCE[2].create_resource(URI(OUT_PATH))
+def Export(path=""):
+    if path == "":
+        path = OUT_PATH
+    output = STATIC_INSTANCE[2].create_resource(URI(path))
     output.use_uuid = True
     output.append(STATIC_INSTANCE[1])
     output.save()

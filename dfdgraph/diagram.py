@@ -11,8 +11,8 @@ class Diagram:
         self.publicNodes: List[DFDNode] = []
         self.boundaries: List[TrustBoundary] = []
 
-    def ExportSparta(self):
-        user = ExternalEntity("", "User")
+    def ExportSparta(self, path=""):
+        user = ExternalEntity("", "User", "RemoteUser")
         
         for node in self.publicNodes:
             user.AddEdge(node)
@@ -25,7 +25,7 @@ class Diagram:
         for df in GLOBAL_DF_SP:
             AddElement(df)
 
-        Export()
+        Export(path + "/output.sparta")
 
     def DrawDiagram(self, g: graphviz.Digraph):
         # Special node representates User
@@ -39,6 +39,7 @@ class Diagram:
         # Separating node and edge draw (graphviz bug)
         user.DrawNode(g)
         for bound in self.boundaries:
+            print(f"In diag: {bound.name}")
             bound.DrawBoundNode(g)
 
         user.DrawEdge(g)

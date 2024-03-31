@@ -75,7 +75,7 @@ def FindNodeRegex(regexName: str, parentID: str, pathID: str) -> List[int]:
     )
     return [elem["id"] for elem in records]
 
-def TaggingNode(regexName: str, pathID: str, group: str, name: str, tag:str="process"):
+def TaggingNode(regexName: str, pathID: str, group: str, name: str, tag:str="process", acctp_name="CloudApplication"):
     records, _, _ = INSTANCE.execute_query(
         """
         MATCH (u:$id:resource)
@@ -84,6 +84,7 @@ def TaggingNode(regexName: str, pathID: str, group: str, name: str, tag:str="pro
         SET u:$tag
         SET u.group = $group
         SET u.general_name = $general_name
+        SET u.acctp_name = $acctp_name
         RETURN ID(u) as id;
         """,
         id = pathID,
@@ -91,6 +92,7 @@ def TaggingNode(regexName: str, pathID: str, group: str, name: str, tag:str="pro
         group=group,
         general_name=name,
         tag=tag,
+        acctp_name=acctp_name,
         database_="memgraph"
     )
 
@@ -207,7 +209,7 @@ def QueryTagged(pathID: str, group: str):
     records, _, _ = INSTANCE.execute_query(
         """
             MATCH (u:$id:tagged:$group)
-            RETURN ID(u) as id, u.group as group, u.general_name as general_name, u.type as name
+            RETURN ID(u) as id, u.group as group, u.general_name as general_name, u.type as name, u.acctp_name as acctp_name
         """,
         id=pathID,
         group=group,
@@ -251,7 +253,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.acctp_name as acctp_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.acctp_name as acctp_name2
         """
         pass
     elif method == "Forward":
@@ -259,7 +261,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.acctp_name as acctp_name1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.acctp_name as acctp_name2
         """
         pass
     elif method == "IntersectForward":
