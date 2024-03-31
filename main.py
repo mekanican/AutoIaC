@@ -90,8 +90,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     for v in rule["relations"]["own"]:
         r = FindOwn(v["first_node"], v["second_node"], v["method"], pathID)
         for u in r: 
-            crafted_name1 = "%s (%s)" % (u["group1"], u["general_name1"])
-            crafted_name2 = "%s (%s)" % (u["group2"], u["general_name2"])
+            crafted_name1 = "%s (%s) - %s" % (u["group1"], u["general_name1"], u["tfname1"])
+            crafted_name2 = "%s (%s) - %s" % (u["group2"], u["general_name2"], u["tfname2"])
             if u["group1"] in boundname:
                 fr = BOUNDARY_ID_NODE[str(u["id1"])] if str(u["id1"]) in BOUNDARY_ID_NODE else TrustBoundary(u["id1"], crafted_name1)
             elif u["group1"] in procname:
@@ -126,7 +126,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 if str(u["id1"]) in BOUNDARY_ID_NODE and str(u["id2"]) in COMPONENT_ID_NODE:
                     logging.info("Already " + str(u))
                     continue
-                to = COMPONENT_ID_NODE[str(u["id2"])] if str(u["id2"]) in COMPONENT_ID_NODE else DataStore(u["id2"], crafted_name1, u["annotation2"])
+                to = COMPONENT_ID_NODE[str(u["id2"])] if str(u["id2"]) in COMPONENT_ID_NODE else DataStore(u["id2"], crafted_name2, u["annotation2"])
                 fr.AddNode(to)
                 compos.add(to.id)
                 if u["name2"] in publics:
@@ -144,7 +144,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         id_ = str(r["id"])
         if id_ in compos:
             continue
-        crafted_name = "%s (%s)" % (r["group"], r["general_name"])
+        crafted_name = "%s (%s) - %s" % (r["group"], r["general_name"], r["tfname"])
         logging.info(f"{id_} - {crafted_name}")
         if r["group"] in procname:
             n = COMPONENT_ID_NODE[id_] if id_ in COMPONENT_ID_NODE else Process(id_, crafted_name, r["annotation"])

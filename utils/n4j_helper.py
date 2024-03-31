@@ -209,7 +209,7 @@ def QueryTagged(pathID: str, group: str):
     records, _, _ = INSTANCE.execute_query(
         """
             MATCH (u:$id:tagged:$group)
-            RETURN ID(u) as id, u.group as group, u.general_name as general_name, u.type as name, u.annotation as annotation
+            RETURN ID(u) as id, u.group as group, u.general_name as general_name, u.type as name, u.annotation as annotation, u.name as tfname
         """,
         id=pathID,
         group=group,
@@ -253,7 +253,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, u.name as tfname1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2, v.name as tfname2
         """
         pass
     elif method == "Forward":
@@ -261,7 +261,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
-            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, u.name as tfname1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2, v.name as tfname2
         """
         pass
     elif method == "IntersectForward":
