@@ -1,33 +1,33 @@
 processes:
   - group_name: VirtualMachine
-    acctp_name: VirtualMachine 
+    annotation: VirtualMachine 
     members:
       - name: EC2
         tf_name: aws_instance
 
   - group_name: ServerlessFunction
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: AwsLambda
         tf_name: aws_lambda_function
         can_public: true
 
   - group_name: WebApplication
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: AwsAmplify
         tf_name: aws_amplify_\w*
         compress: true
   
   - group_name: Authenticator
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: AmazonCognito
         tf_name: aws_cognito_((user)|(identity))_pool
         compress: true
   
   - group_name: LoadBalancer
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: APIGateway
         tf_name: aws_api_gateway_\w*
@@ -35,14 +35,14 @@ processes:
         can_public: true
 
   - group_name: VirtualFirewall
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: SecurityGroup
         tf_name: aws_security_group
         can_public: true
 
   - group_name: IAM
-    acctp_name: CloudApplication 
+    annotation: CloudApplication 
     members:
       - name: IAM
         tf_name: aws_iam_instance_profile

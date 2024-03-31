@@ -44,10 +44,10 @@ boundaries:
 data_stores:
     # ...
 ``` 
-- Each key contains an array of info about group and its members. Info structure is the same for process, boundary and data store, there are 3 keys to fulfill: `group_name`, `acctp_name` and `members`. This is where you annotate the terraform resource in to group and showed name on DFD 
+- Each key contains an array of info about group and its members. Info structure is the same for process, boundary and data store, there are 3 keys to fulfill: `group_name`, `annotation` and `members`. This is where you annotate the terraform resource in to group and showed name on DFD 
 ```yaml
     - group_name: VirtualMachine # Name of the group
-      acctp_name: VirtualMachine # Category in ACCTP for Advanced DFD. It is one of the following:
+      annotation: VirtualMachine # Annotation for Advanced DFD. It is one of the following:
                                  # CloudApplication: Represent applications/services that have ability of computational in infrastructure, except the virtual machine
                                  # ExternalService: Service that is interracting outside of system
                                  # Container: Service that is related to Container (docker, ECS, ...)
