@@ -2,6 +2,7 @@ import os
 from subprocess import run
 import logging
 from utils import get_random_tmp_path
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -41,22 +42,52 @@ def InitTerraform(folderPath, isTofu=True):
     logger.info("Running %s" % ' '.join(command)) 
     run(command)
     # Init
+    # command = [
+    #         "tofu" if isTofu else "terraform",
+    #         "-chdir=%s"%folderPath,
+    #         "init"
+    # ]
     command = [
-            "tofu" if isTofu else "terraform",
-            "-chdir=%s"%folderPath,
-            "init"
+        "docker",
+        "run",
+        "--platform",
+        "linux/amd64",
+        "--rm",
+        "-a",
+        "stdout",
+        "-v",
+        str(os.path.abspath(folderPath)) + ":/app",
+        "hashicorp/terraform:1.8.0-rc2",
+        "-chdir=/app",
+        "init"
     ]
+
 
     logger.info("Running %s" % ' '.join(command)) 
     run(command, check=True)
 
 # tofu graph -chdir ../aws_vpc_msk/
 def GenerateDotFile(folderPath: str, isTofu=True) -> str:
+    # command = [
+    #         "tofu" if isTofu else "terraform",
+    #         "-chdir=%s"%folderPath,
+    #         "graph",
+    #         "-type=plan"
+    # ]
     command = [
-            "tofu" if isTofu else "terraform",
-            "-chdir=%s"%folderPath,
-            "graph",
-            "-type=plan"
+        "docker",
+        "run",
+        "--platform",
+        "linux/amd64",
+        "--rm",
+        "-a",
+        "stdout",
+        "-v",
+        str(os.path.abspath(folderPath)) + ":/app",
+        "hashicorp/terraform:1.8.0-rc2",
+        "-chdir=/app",
+        "graph",
+        "-type=plan"
     ]
 
     logger.info("Running %s" % ' '.join(command)) 
@@ -71,11 +102,26 @@ def GenerateDotFile(folderPath: str, isTofu=True) -> str:
     return path
 
 def GenerateJSON(dotPath: str) -> str:
+    # command = [
+    #         "terraform-graph-beautifier",
+    #         "-input",
+    #         dotPath,
+    #         "--output-type=cyto-json"
+    # ]
     command = [
-            "terraform-graph-beautifier",
-            "-input",
-            dotPath,
-            "--output-type=cyto-json"
+        "docker",
+        "run",
+        "--platform",
+        "linux/amd64",
+        "--rm",
+        "-a",
+        "stdout",
+        "-v",
+        str(os.path.abspath(dotPath))+":/app/d.dot",
+        "ghcr.io/pcasteran/terraform-graph-beautifier:0.3.4-linux",
+        "-input",
+        "/app/d.dot",
+        "--output-type=cyto-json"
     ]
 
     logger.info("Running %s" % ' '.join(command)) 
