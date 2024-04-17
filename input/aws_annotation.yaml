@@ -58,7 +58,6 @@ boundaries:
     members:
       - name: Subnet
         tf_name: aws_subnet
-        compress: true
 
 data_stores:
   - group_name: FileStorage

@@ -1,0 +1,38 @@
+processes:
+  - group_name: VirtualMachine
+    annotation: VirtualMachine 
+    members:
+      - name: AzureWindowsVM
+        tf_name: azurerm_windows_virtual_machine
+      - name: Bastion
+        tf_name: azurerm_bastion_host
+        can_public: true
+
+  # - group_name: VirtualFirewall
+  #   annotation: CloudApplication 
+  #   members:
+  #     - name: SecurityGroup
+  #       tf_name: azurerm_network_security_group
+  #       can_public: true
+
+boundaries:
+  - group_name: VirtualNetwork
+    members:
+      - name: VirtualNetwork
+        tf_name: azurerm_virtual_network
+
+  - group_name: Subnet
+    members:
+      - name: Subnet
+        tf_name: azurerm_subnet
+
+data_stores:
+  - group_name: FileStorage
+    members:
+      - name: Blob
+        tf_name: azurerm_storage_container
+        can_public: true
+
+external_entities:
+  - name: User
+    annotation: RemoteUser
