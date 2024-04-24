@@ -265,10 +265,20 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "IntersectForward":
-        chain = "-[]->"
+        chain = "-[*]->(x)<-[*]-"
+        return f"""
+            MATCH (u:$id:tagged){chain}(v:$id:tagged)
+            WHERE u.group='{firstNode}' AND v.group='{secondNode}'
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, u.name as tfname1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2, v.name as tfname2
+        """
         pass
     elif method == "IntersectBackward":
-        chain = "<-[]-"
+        chain = "<-[*]-(x)-[*]->"
+        return f"""
+            MATCH (u:$id:tagged){chain}(v:$id:tagged)
+            WHERE u.group='{firstNode}' AND v.group='{secondNode}'
+            RETURN ID(u) as id1, u.group as group1, u.general_name as general_name1, u.type as name1, u.annotation as annotation1, u.name as tfname1, ID(v) as id2, v.group as group2, v.general_name as general_name2, v.type as name2, v.annotation as annotation2, v.name as tfname2
+        """
         pass
 
     raise NotImplementedError
