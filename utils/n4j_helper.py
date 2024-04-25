@@ -265,7 +265,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "IntersectForward":
-        chain = "-[*]->(x)<-[*]-"
+        chain = "-[*]->(x:$id)<-[*]-"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -273,7 +273,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "IntersectBackward":
-        chain = "<-[*]-(x)-[*]->"
+        chain = "<-[*]-(x:$id)-[*]->"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -316,3 +316,179 @@ def QueryAllConnectionResource(pathID: str):
     database_="memgraph"
     )
     return records
+
+# For optimizing on large database
+def RemoveNonTagged(pathID: str):
+    
+    while True:
+        flag = False
+        r = 1
+        while r > 0:
+            records, _, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id)
+                WHERE not (u:tagged) AND not exists ((u)<-[:REF]-(:$id)) 
+                    AND outDegree(u) = 1
+                    //AND not exists((u)-[*]->(:$id:tagged)) 
+                DETACH DELETE u
+                RETURN COUNT(u) as cnt
+            """,
+            id = pathID,
+            database_="memgraph"
+            )
+            r = records[0]["cnt"]
+            logger.info("DELETE case 1: " + str(r))
+            flag = flag or (r > 0)
+        
+        
+        r = 1
+        while r > 0:
+            records, _, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id)
+                WHERE not (u:tagged) AND not exists ((u)-[:REF]->(:$id))
+                    AND inDegree(u) = 1
+                    // AND not exists((u)<-[*]-(:$id:tagged)) 
+                DETACH DELETE u
+                RETURN COUNT(u) as cnt
+            """,
+            id = pathID,
+            database_="memgraph"
+            )
+            r = records[0]["cnt"]
+            logger.info("DELETE case 2: " + str(r))
+            flag = flag or (r > 0)
+        
+        r = 1
+        while r > 0:
+            records, _, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id)
+                WHERE not (u:tagged)  AND not exists ((u)<-[:REF]-(:$id))
+                    // AND outDegree(u) = 1
+                    AND not exists((:$id:tagged)<-[*]-(u)-[*]->(:$id:tagged)) 
+                DETACH DELETE u
+                RETURN COUNT(u) as cnt
+            """,
+            id = pathID,
+            database_="memgraph"
+            )
+            r = records[0]["cnt"]
+            logger.info("DELETE case 3: " + str(r))
+            flag = flag or (r > 0)
+        
+        
+        r = 1
+        while r > 0:
+            records, _, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id)
+                WHERE not (u:tagged)  AND not exists ((u)-[:REF]->(:$id))
+                    // AND outDegree(u) = 1
+                    AND not exists((:$id:tagged)-[*]->(u)<-[*]-(:$id:tagged)) 
+                DETACH DELETE u
+                RETURN COUNT(u) as cnt
+            """,
+            id = pathID,
+            database_="memgraph"
+            )
+            r = records[0]["cnt"]
+            logger.info("DELETE case 4: " + str(r))
+            flag = flag or (r > 0)
+
+        if not flag:
+            break
+
+    # records, _, _ = INSTANCE.execute_query(
+    # """
+    #     OPTIONAL MATCH (u:$id)<-[:REF]-(s:$id)
+    #     WHERE not (u:tagged)
+    #     OPTIONAL MATCH (u)-[:REF]->(d:$id)
+
+    #     DETACH DELETE u
+    #     WITH collect(s) as cs, collect(d) as cd
+    #     UNWIND cs as ucs
+    #     UNWIND cd as ucd
+    #     MERGE (ucs)-[:REF]->(ucd)
+    #     RETURN count(*) as cnt
+    # """,
+    # id = pathID,
+    # database_="memgraph"
+    # )
+    # logger.info("DELETE case 3: " + str(records[0]["cnt"]))
+    
+def FindNodeRegexAnyModule(regexName, pathID):
+    records, _, _ = INSTANCE.execute_query(
+        """
+        MATCH (u:$id:resource)
+        WHERE u.type =~ $regex
+        RETURN ID(u) as id;
+        """,
+        id = pathID,
+        regex=regexName,
+        database_="memgraph"
+    )
+    return [elem["id"] for elem in records]
+
+def CompressV2(regexName, pathID):
+    node_ids = FindNodeRegexAnyModule(regexName, pathID)
+    if len(node_ids) <= 1:
+        logger.info("Nothing to compress")
+        return
+    logger.info(f"Got {len(node_ids)} nodes in same group")
+
+
+    records, _, _ = INSTANCE.execute_query(
+        "CREATE (u:dummy) RETURN *",
+        database_="memgraph"
+    )
+
+    for _id in node_ids:
+        logging.info(str(_id))
+        records, summary, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id:resource)-[:REF]->(v:$id:resource), (x:dummy)
+
+                WHERE ID(v) = $nodeid 
+                    AND ID(u) != ID(v)
+                    AND ID(u) in $list 
+
+                OPTIONAL MATCH f=(s:$id)-[:REF]->(v)
+                WHERE ID(s) != ID(u)
+
+                OPTIONAL MATCH g=(v)-[:REF]->(d:$id)
+
+                DETACH DELETE v
+
+                WITH collect(s) as cs, collect(d) as cd, x, u
+                UNWIND (CASE cs WHEN [] then [x] else cs end) as ucs
+                UNWIND (CASE cd WHEN [] then [x] else cd end) as ucd
+                MERGE (ucs)-[:REF]->(u)
+                MERGE (u)-[:REF]->(ucd)
+                return *;
+            """,
+            id = pathID,
+            nodeid=_id,
+            list=node_ids,
+            database_="memgraph"
+        )
+        logging.info(str(summary.counters))
+    
+    records, _, _ = INSTANCE.execute_query(
+        "MATCH (u:dummy) DETACH DELETE u",
+        database_="memgraph"
+    )
+
+    
+
+    pass
+
+def Cleanup(pathID):
+    records, _, _ = INSTANCE.execute_query(
+        """
+        MATCH (u:$id)-[rel]-(u:$id)
+        DELETE rel
+        """,
+        id = pathID,
+        database_="memgraph"
+    )

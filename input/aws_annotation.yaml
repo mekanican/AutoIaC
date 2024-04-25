@@ -4,12 +4,13 @@ processes:
     members:
       - name: EC2
         tf_name: aws_instance
+        compress: true
 
   - group_name: ServerlessFunction
     annotation: CloudApplication 
     members:
       - name: AwsLambda
-        tf_name: aws_lambda_function
+        tf_name: aws_lambda_\w*
         can_public: true
 
   - group_name: WebApplication
@@ -23,7 +24,7 @@ processes:
     annotation: CloudApplication 
     members:
       - name: AmazonCognito
-        tf_name: aws_cognito_((user)|(identity))_pool
+        tf_name: aws_cognito_\w*
         compress: true
   
   - group_name: LoadBalancer
@@ -38,14 +39,16 @@ processes:
     annotation: CloudApplication 
     members:
       - name: SecurityGroup
-        tf_name: aws_security_group
+        tf_name: aws_security_group\w*
+        compress: true
         can_public: true
 
   - group_name: IAM
     annotation: CloudApplication 
     members:
       - name: IAM
-        tf_name: aws_iam_instance_profile
+        tf_name: aws_iam_\w*
+        compress: true
         can_public: true
 
 boundaries:
@@ -63,7 +66,8 @@ data_stores:
   - group_name: FileStorage
     members:
       - name: S3
-        tf_name: aws_s3_bucket
+        tf_name: aws_s3_bucket\w*
+        compress: true
         can_public: true
         
   - group_name: Database
@@ -77,5 +81,5 @@ data_stores:
 external_entities:
   - name: User
     annotation: RemoteUser
-  - name: Mobile
-    annotation: ExternalService
+  # - name: Mobile
+  #   annotation: ExternalService

@@ -6,6 +6,8 @@ from .dataflow import DataFlow
 
 COMPONENT_ID_NODE: Mapping[str, "DFDNode"] = {}
 
+DF_MAP = set()
+
 class DFDNode:
     def __init__(self, id, name, anno):
         self.name = name
@@ -26,6 +28,10 @@ class DFDNode:
         for df in self.dataflow:
             df.MakeDirected(g)
     def AddEdge(self, toNode: "DFDNode", label = "", refBound = None):
+        if (self, toNode) in DF_MAP:
+            return
+        else:
+            DF_MAP.add((self, toNode))
         df = DataFlow(self, toNode, label)
         self.dataflow.append(df)
         # Not used!

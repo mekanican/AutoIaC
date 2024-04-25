@@ -3,6 +3,7 @@ import json
 import fire
 import logging
 import graphviz
+import re
 
 from dfdgraph import DataStore
 from dfdgraph.component import COMPONENT_ID_NODE
@@ -10,7 +11,7 @@ from dfdgraph.trustboundary import BOUNDARY_ID_NODE
 from graph import LoadFromFolder
 from dfdgraph import Diagram, Process, TrustBoundary
 from tfparser.tfgrep import GetSemgrepJSON
-from utils.n4j_helper import CleanUp, CompressNode, FindOwn, GetListParent, QueryAllConnectionResource, QueryOutermostBoundary, QueryTagged, RemovePublicBoundaries, TaggingNode, TaggingPublic
+from utils.n4j_helper import CleanUp, Cleanup, CompressNode, CompressV2, FindOwn, GetListParent, QueryAllConnectionResource, QueryOutermostBoundary, QueryTagged, RemoveNonTagged, RemovePublicBoundaries, TaggingNode, TaggingPublic
 from utils.yaml_importer import print_object, read_config
 
 logging.basicConfig(level = logging.INFO)
@@ -38,6 +39,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         [m["tf_name"] for c in anno["data_stores"] for m in c["members"] if m.get("can_public", False)]
     )
 
+
     # Cleaning up (FOR DEBUGGING ONLY)
     CleanUp()
 
@@ -45,20 +47,35 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     pathID = LoadFromFolder(in_path, init=reinit)
     print("-----")
 
-    parents = GetListParent(pathID)
-    print(parents)
-    print(compresses)
-    for parent in parents:
-        for compress in compresses:
-            logging.info(f"Process {compress} in {parent}")
-            CompressNode(compress, parent, pathID)
-            
     for key in anno:
         if key == "external_entities":
             continue
         for c in anno[key]:
             for member in c["members"]:
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
+
+    RemoveNonTagged(pathID)
+    # return
+    for compress in compresses:
+        logging.info("Compressing " + compress)
+        CompressV2(compress, pathID)
+
+    # return
+
+    # parents = GetListParent(pathID)
+    # print(parents)
+    # print(compresses)
+    # for parent in parents:
+    #     for compress in compresses:
+    #         logging.info(f"Process {compress} in {parent}")
+    #         CompressNode(compress, parent, pathID)
+            
+    # for key in anno:
+    #     if key == "external_entities":
+    #         continue
+    #     for c in anno[key]:
+    #         for member in c["members"]:
+    #             TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
 
     sem_json = json.load(open(GetSemgrepJSON(in_path, sem_rule), "r"))
     for v in rule["publics"]:
@@ -70,6 +87,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
             TaggingPublic(pathID, bound)
 
     RemovePublicBoundaries(pathID)
+
+    Cleanup(pathID)
 
     procname = set(c["group_name"] for c in anno["processes"])
     dsname = set(c["group_name"] for c in anno["data_stores"])
@@ -111,8 +130,10 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 if u["group1"] not in boundname:
                     to.AddNode(fr)
                     compos.add(fr.id)
-                    if u["name1"] in publics:
-                        diag.AddPublicNode(fr)
+                    # if u["name1"] in publics:
+                    for pub in publics:
+                        if re.fullmatch(pub, u["name1"]):
+                            diag.AddPublicNode(fr)
                 else:
                     fr.AddInnerBound(to)
             elif u["group2"] in procname:
@@ -122,8 +143,10 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 to = COMPONENT_ID_NODE[str(u["id2"])] if str(u["id2"]) in COMPONENT_ID_NODE else Process(u["id2"], crafted_name2, u["annotation2"])
                 fr.AddNode(to)
                 compos.add(to.id)
-                if u["name2"] in publics:
-                    diag.AddPublicNode(to)
+                for pub in publics:
+                    if re.fullmatch(pub, u["name2"]):
+                # if u["name2"] in publics:
+                        diag.AddPublicNode(to)
             elif u["group2"] in dsname:
                 if str(u["id1"]) in BOUNDARY_ID_NODE and str(u["id2"]) in COMPONENT_ID_NODE:
                     logging.info("Already " + str(u))
@@ -131,8 +154,12 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 to = COMPONENT_ID_NODE[str(u["id2"])] if str(u["id2"]) in COMPONENT_ID_NODE else DataStore(u["id2"], crafted_name2, u["annotation2"])
                 fr.AddNode(to)
                 compos.add(to.id)
-                if u["name2"] in publics:
-                    diag.AddPublicNode(to)
+                # if u["name2"] in publics:
+                #     diag.AddPublicNode(to)
+                for pub in publics:
+                    if re.fullmatch(pub, u["name2"]):
+                # if u["name2"] in publics:
+                        diag.AddPublicNode(to)
             logging.info("TO " + type(to).__name__ + str(to.name) + " " + to.id)
 
     # Add boundaries to graph
@@ -154,8 +181,11 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
             n = COMPONENT_ID_NODE[id_] if id_ in COMPONENT_ID_NODE else DataStore(id_, crafted_name, r["annotation"])
         aws.AddNode(n)
         logging.info(crafted_name)    
-        if r["name"] in publics:
-            diag.AddPublicNode(n)
+
+        for pub in publics:
+            if re.fullmatch(pub, r["name"]):
+        # if r["name"] in publics:
+                diag.AddPublicNode(n)
 
     logging.info("------- Outer boundary -----")
 
