@@ -55,6 +55,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
 
     RemoveNonTagged(pathID)
+    Cleanup(pathID)
     # return
     for compress in compresses:
         logging.info("Compressing " + compress)
