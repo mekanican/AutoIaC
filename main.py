@@ -203,7 +203,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         # print(r)
         logging.info(crafted_name1 + "-->" + crafted_name2)
         COMPONENT_ID_NODE.get(str(r["id1"])).AddEdge(COMPONENT_ID_NODE.get(str(r["id2"])))
-        COMPONENT_ID_NODE.get(str(r["id2"])).AddEdge(COMPONENT_ID_NODE.get(str(r["id1"])))
+        # COMPONENT_ID_NODE.get(str(r["id2"])).AddEdge(COMPONENT_ID_NODE.get(str(r["id1"])))
             
         
     # Fill with connections

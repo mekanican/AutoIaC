@@ -18,7 +18,7 @@ class Diagram:
         for node in self.publicNodes:
             for ee in ee_list:
                 ee.AddEdge(node)
-                node.AddEdge(ee)
+                # node.AddEdge(ee)
 
         for ee in ee_list:
             AddElement(ee.Get())
@@ -38,7 +38,7 @@ class Diagram:
         for node in self.publicNodes:
             for ee in ee_list:
                 ee.AddEdge(node)
-                node.AddEdge(ee)
+                # node.AddEdge(ee)
 
         # Separating node and edge draw (graphviz bug)
         for ee in ee_list:

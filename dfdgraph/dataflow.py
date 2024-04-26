@@ -18,6 +18,6 @@ class DataFlow:
         GLOBAL_DF_SP.append(self.df)
         
     def MakeDirected(self, g: graphviz.Digraph):
-        g.edge(self.fromNode.id, self.toNode.id, label=self.label)
+        g.edge(self.fromNode.id, self.toNode.id, label=self.label, dir="both")
     def Get(self):
         return self.df
