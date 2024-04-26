@@ -473,13 +473,13 @@ def CompressV2(regexName, pathID):
             database_="memgraph"
         )
         logging.info(str(summary.counters))
+        Cleanup(pathID)   # Performance bottlleneck, but required 
     
     records, _, _ = INSTANCE.execute_query(
         "MATCH (u:dummy) DETACH DELETE u",
         database_="memgraph"
     )
 
-    
 
     pass
 
