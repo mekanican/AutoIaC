@@ -34,6 +34,14 @@ processes:
         tf_name: aws_api_gateway_\w*
         compress: true
         can_public: true
+      - name: APIGateway
+        tf_name: aws_apigatewayv2_\w*
+        compress: true
+        can_public: true
+      - name: ALB
+        tf_name: aws_lb\w*
+        compress: true
+
 
   - group_name: VirtualFirewall
     annotation: CloudApplication 
@@ -50,7 +58,53 @@ processes:
         tf_name: aws_iam_\w*
         compress: true
         can_public: true
+    
+  - group_name: EmailService
+    annotation: CloudApplication 
+    members:
+      - name: AmazonSES
+        tf_name: aws_ses_\w*
+        compress: true
+        # can_public: true
+  - group_name: ServerlessETL
+    annotation: CloudApplication
+    members:
+      - name: GlueCatalog
+        tf_name: aws_glue_catalog\w*
+        compress: true
+      - name: GlueCrawler
+        tf_name: aws_glue_crawler\w*
+        compress: true
+      - name: GlueJob
+        tf_name: aws_glue_(job|trigger|workflow|connection) 
+        compress: true
 
+  - group_name: DNS
+    annotation: CloudApplication
+    members:
+      - name: Route53
+        tf_name: aws_route53_\w*
+        compress: true
+  - group_name: IOTCore
+    annotation: CloudApplication
+    members:
+      - name: AWSIOT
+        tf_name: aws_iot_\w*
+        compress: true
+  - group_name: WebFirewall
+    annotation: CloudApplication
+    members:
+      - name: AWSWAF
+        tf_name: aws_wafv2_\w*
+        compress: true
+  - group_name: KubernetesCluster
+    annotation: CloudApplication
+    members:
+      - name: EKS
+        tf_name: aws_eks_\w*
+        compress: true
+  
+  
 boundaries:
   - group_name: VirtualNetwork
     members:
@@ -77,6 +131,20 @@ data_stores:
       - name: RDS
         tf_name: aws_((db_instance)|(rds_cluster))
         compress: true
+  - group_name: KeyStorage
+    members:
+      - name: KMS
+        tf_name: aws_kms_\w*
+        compress: true
+      - name: CertManager
+        tf_name: aws_acm_certificate\w*
+        compress: true
+
+  # - group_name: AuditLog
+  #   members:
+  #     - name: AWSConfig
+  #       tf_name: aws_config_\w*
+  #       compress: true
 
 external_entities:
   - name: User
