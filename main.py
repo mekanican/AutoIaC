@@ -10,14 +10,14 @@ from dfdgraph.component import COMPONENT_ID_NODE
 from dfdgraph.trustboundary import BOUNDARY_ID_NODE
 from graph import LoadFromFolder
 from dfdgraph import Diagram, Process, TrustBoundary
-from tfparser.tfgrep import GetSemgrepJSON
+from tfparser.tfgrep import GetSemgrepJSON, SemgrepFix
 from utils.n4j_helper import CleanUp, Cleanup, CompressNode, CompressV2, FindOwn, GetListParent, QueryAllConnectionResource, QueryOutermostBoundary, QueryTagged, RemoveNonTagged, RemovePublicBoundaries, TaggingNode, TaggingPublic
 from utils.yaml_importer import print_object, read_config
 
 logging.basicConfig(level = logging.INFO)
 
 
-def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", out_path="./output", reinit=True, graph_mode=False):
+def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", fix_rule="./input/depend_on_rule.yaml", out_path="./output", reinit=True, graph_mode=False, rm_depend_on=True):
     print(f"Reading {in_path}, Writing to {out_path}")
 
     anno = read_config(anno_path)
@@ -39,6 +39,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         [m["tf_name"] for c in anno["data_stores"] for m in c["members"] if m.get("can_public", False)]
     )
 
+    if rm_depend_on:
+        SemgrepFix(in_path, fix_rule)
 
     # Cleaning up (FOR DEBUGGING ONLY)
     CleanUp()

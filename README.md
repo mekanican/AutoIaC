@@ -17,6 +17,8 @@ Automated App to convert IaCs scripts to DFD
 - `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)
 - `--rule_path`: specify path to rule of relation (default to `./input/aws_rule.yaml`)
 - `--graph_mode=True` to export graph instead of sparta
+- `-f`: specify path to semgrep rule for depends_on (default to `./input/depend_on_rule.yaml`) 
+- `--rm_depend_on=False` to disable "depends_on" removal
 
 ---
 ## Annotation structure
