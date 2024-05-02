@@ -16,6 +16,12 @@ class DataFlow:
         )
         # print(fromNode.name, toNode.name)
         GLOBAL_DF_SP.append(self.df)
+        # bidirection inference
+        GLOBAL_DF_SP.append(SpartaComponent.DataFlow(
+            self.toNode.Get(),
+            self.fromNode.Get(), 
+            toNode.name + "->" + fromNode.name
+        ))
         
     def MakeDirected(self, g: graphviz.Digraph):
         g.edge(self.fromNode.id, self.toNode.id, label=self.label, dir="both")
