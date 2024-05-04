@@ -2,7 +2,7 @@ import graphviz
 from typing import List
 
 from dfdgraph.dataflow import GLOBAL_DF_SP
-from sparta_utils.sparta import AddElement, Export
+from sparta_utils.sparta import AddElement, Export, ThreatAnalyze
 from .component import DFDNode, ExternalEntity
 from .trustboundary import TrustBoundary
 
@@ -29,6 +29,7 @@ class Diagram:
             AddElement(df)
 
         Export(path + "/output.sparta")
+        ThreatAnalyze(path + "/output.csv", path + "/output.sparta")
 
     def DrawDiagram(self, g: graphviz.Digraph, external_entities):
         # Special node representates User

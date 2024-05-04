@@ -2,6 +2,10 @@
 from pyecore.resources import ResourceSet, URI
 from pyecore.utils import DynamicEPackage
 import os
+import logging
+
+from subprocess import run
+logger = logging.getLogger(__name__)
 
 # CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACThreatTypeCatalog.sparta"))
 CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACNewCatalog.sparta"))
@@ -76,3 +80,20 @@ def Export(path=""):
     output.use_uuid = True
     output.append(STATIC_INSTANCE[1])
     output.save()
+
+def ThreatAnalyze(csv_path, sparta_path):
+    command = [
+        "java",
+        "-jar",
+        "./sparta_utils/sparta-cli.jar",
+        "-i",
+        sparta_path,
+        "-pt",
+        "./sparta_utils/IACNewCatalog.sparta",
+        "-oc", 
+        csv_path
+        # "result.csv"
+    ]
+
+    logger.info("Running %s" % ' '.join(command)) 
+    run(command)
