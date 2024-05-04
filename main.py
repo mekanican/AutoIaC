@@ -11,7 +11,7 @@ from dfdgraph.trustboundary import BOUNDARY_ID_NODE
 from graph import LoadFromFolder
 from dfdgraph import Diagram, Process, TrustBoundary
 from tfparser.tfgrep import GetSemgrepJSON, SemgrepFix
-from utils.n4j_helper import CleanUp, Cleanup, CompressNode, CompressV2, FindOwn, GetListParent, QueryAllConnectionResource, QueryOutermostBoundary, QueryTagged, RemoveNonTagged, RemovePublicBoundaries, TaggingNode, TaggingPublic
+from utils.n4j_helper import CleanUp, Cleanup, CompressNode, CompressV2, FindOwn, GetListParent, LinkTagged, QueryAllConnectionResource, QueryOutermostBoundary, QueryTagged, RemoveNonTagged, RemovePublicBoundaries, TaggingNode, TaggingPublic
 from utils.yaml_importer import print_object, read_config
 
 logging.basicConfig(level = logging.INFO)
@@ -55,7 +55,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         for c in anno[key]:
             for member in c["members"]:
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
-
+    LinkTagged(pathID)
     RemoveNonTagged(pathID)
     Cleanup(pathID)
     # return

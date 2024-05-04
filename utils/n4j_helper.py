@@ -317,6 +317,38 @@ def QueryAllConnectionResource(pathID: str):
     )
     return records
 
+def LinkTagged(pathID: str):
+    # Link
+    _, _, _ = INSTANCE.execute_query(
+    """
+    MATCH (u:$id:tagged:resource) -[*]-> (v:$id:tagged:resource)
+    MERGE (u)-[:REF]->(v)
+    RETURN *
+    """,
+    id=pathID,
+    database_="memgraph"
+    )
+    # And cleanup
+    _, _, _ = INSTANCE.execute_query(
+    """
+    MATCH (u:$id) -[rel]-> (v:$id:tagged:resource)
+    WHERE not (u:tagged)
+    DELETE rel
+    """,
+    id=pathID,
+    database_="memgraph"
+    )
+
+    _, _, _ = INSTANCE.execute_query(
+    """
+    MATCH (u:$id) <-[rel]- (v:$id:tagged:resource)
+    WHERE not (u:tagged)
+    DELETE rel
+    """,
+    id=pathID,
+    database_="memgraph"
+    )
+
 # For optimizing on large database
 def RemoveNonTagged(pathID: str):
     
