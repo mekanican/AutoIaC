@@ -11,6 +11,7 @@ processes:
     members:
       - name: AwsLambda
         tf_name: aws_lambda_\w*
+        compress: true
         can_public: true
 
   - group_name: WebApplication
@@ -76,7 +77,7 @@ processes:
         tf_name: aws_glue_crawler\w*
         compress: true
       - name: GlueJob
-        tf_name: aws_glue_(job|trigger|workflow|connection) 
+        tf_name: aws_glue_((job)|(trigger)|(workflow)|(connection)) 
         compress: true
       - name: StepFunction
         tf_name: aws_sfn_\w*
@@ -148,7 +149,7 @@ data_stores:
       - name: RDS
         tf_name: aws_((db_instance)|(rds_cluster))
         compress: true
-  - group_name: KeyStorage
+  - group_name: SecretStorage
     members:
       - name: KMS
         tf_name: aws_kms_\w*
@@ -156,6 +157,9 @@ data_stores:
       - name: CertManager
         tf_name: aws_acm_certificate\w*
         compress: true
+      - name: SSMParameter
+        tf_name: aws_ssm_parameter
+
 
   # - group_name: AuditLog
   #   members:

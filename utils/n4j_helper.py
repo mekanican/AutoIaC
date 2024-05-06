@@ -479,16 +479,19 @@ def CompressV2(regexName, pathID):
         logging.info(str(_id))
         records, summary, _ = INSTANCE.execute_query(
             """
-                MATCH (u:$id:resource)-[:REF]->(v:$id:resource), (x:dummy)
+                MATCH (u:$id:resource)-[:REF]-(v:$id:resource), (x:dummy)
 
                 WHERE ID(v) = $nodeid 
                     AND ID(u) != ID(v)
                     AND ID(u) in $list 
+                
+                WITH u,v,x LIMIT 1
 
                 OPTIONAL MATCH f=(s:$id)-[:REF]->(v)
                 WHERE ID(s) != ID(u)
 
                 OPTIONAL MATCH g=(v)-[:REF]->(d:$id)
+                WHERE ID(d) != ID(u)
 
                 DETACH DELETE v
 

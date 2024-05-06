@@ -55,7 +55,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         for c in anno[key]:
             for member in c["members"]:
                 TaggingNode(member["tf_name"], pathID, c["group_name"], member["name"], key, c.get("annotation", ""))
-    LinkTagged(pathID)
+
     RemoveNonTagged(pathID)
     Cleanup(pathID)
     # return
@@ -63,6 +63,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         logging.info("Compressing " + compress)
         CompressV2(compress, pathID)
 
+    LinkTagged(pathID)
+    RemoveNonTagged(pathID)
     # return
 
     # parents = GetListParent(pathID)
