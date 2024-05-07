@@ -122,6 +122,12 @@ processes:
         tf_name: aws_sqs_queue\w*
         compress: true
   
+  - group_name: Cache
+    annotation: CloudApplication
+    members:
+      - name: ElastiCache
+        tf_name: aws_elasticache\w*
+        compress: true
   
 boundaries:
   - group_name: VirtualNetwork
