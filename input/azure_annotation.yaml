@@ -2,11 +2,23 @@ processes:
   - group_name: VirtualMachine
     annotation: VirtualMachine 
     members:
-      - name: AzureWindowsVM
-        tf_name: azurerm_windows_virtual_machine
+      - name: AzureVM
+        tf_name: azurerm((_linux)|(_windows))?_virtual_machine\w*
       - name: Bastion
         tf_name: azurerm_bastion_host
         can_public: true
+  - group_name: ServerlessFunction
+    annotation: CloudApplication
+    members:
+      - name: AzureFunctionApp
+        tf_name: azurerm((_linux)|(_windows))?_function_app\w*
+        compress: true
+  - group_name: StorageManager
+    annotation: CloudApplication
+    members:
+      - name: StorageContainer
+        tf_name: azurerm_storage_container\w*
+        compress: true
 
   # - group_name: VirtualFirewall
   #   annotation: CloudApplication 
@@ -14,6 +26,14 @@ processes:
   #     - name: SecurityGroup
   #       tf_name: azurerm_network_security_group
   #       can_public: true
+  #       
+  - group_name: IAM
+    annotation: CloudApplication
+    members:
+      - name: AzureRole
+        tf_name: azurerm_role_\w*
+        compress: true
+        can_public: true
 
 boundaries:
   - group_name: VirtualNetwork
@@ -29,9 +49,14 @@ boundaries:
 data_stores:
   - group_name: FileStorage
     members:
-      - name: Blob
-        tf_name: azurerm_storage_container
-        can_public: true
+      - name: StorageBlob
+        tf_name: azurerm_storage_blob\w*
+        compress: true
+  - group_name: Database
+    members:
+      - name: CosmosDB
+        tf_name: azurerm_cosmosdb\w*
+        compress: true
 
 external_entities:
   - name: User

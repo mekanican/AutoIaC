@@ -17,7 +17,7 @@ from utils.yaml_importer import print_object, read_config
 logging.basicConfig(level = logging.INFO)
 
 
-def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", fix_rule="./input/depend_on_rule.yaml", out_path="./output", reinit=True, graph_mode=False, rm_depend_on=True):
+def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", fix_rule="./input/depend_on_rule.yaml", out_path="./output", global_tb_name="Cloud", reinit=True, graph_mode=False, rm_depend_on=True):
     print(f"Reading {in_path}, Writing to {out_path}")
 
     anno = read_config(anno_path)
@@ -168,7 +168,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
             logging.info("TO " + type(to).__name__ + str(to.name) + " " + to.id)
 
     # Add boundaries to graph
-    aws = TrustBoundary("", "AWS")
+    aws = TrustBoundary("", global_tb_name)
     diag.AddBoundary(aws)
 
     logging.info("GOT: " + str(compos))
