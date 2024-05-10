@@ -249,7 +249,7 @@ def RemovePublicBoundaries(pathID: str):
 
 def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
     if method == "Backward":
-        chain = "<-[*]-"
+        chain = "<-[:REF]-"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -257,7 +257,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "Forward":
-        chain = "-[*]->"
+        chain = "-[:REF]->"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -265,7 +265,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "IntersectForward":
-        chain = "-[*]->(x:$id)<-[*]-"
+        chain = "-[:REF]->(x:$id)<-[:REF]-"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -273,7 +273,7 @@ def OwnRuleToQuery(firstNode: str, secondNode: str, method: str) -> str:
         """
         pass
     elif method == "IntersectBackward":
-        chain = "<-[*]-(x:$id)-[*]->"
+        chain = "<-[:REF]-(x:$id)-[:REF]->"
         return f"""
             MATCH (u:$id:tagged){chain}(v:$id:tagged)
             WHERE u.group='{firstNode}' AND v.group='{secondNode}'
@@ -322,6 +322,7 @@ def LinkTagged(pathID: str):
     _, _, _ = INSTANCE.execute_query(
     """
     MATCH (u:$id:tagged:resource) -[*]-> (v:$id:tagged:resource)
+    WHERE NOT exists((u)-[*]->(:$id:tagged:resource)-[*]->(v))
     MERGE (u)-[:REF]->(v)
     RETURN *
     """,
