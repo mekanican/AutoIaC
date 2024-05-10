@@ -14,6 +14,10 @@ relations:
       first_node: Subnet
       second_node: Database
       method: Backward
+    - id: glue2subnet
+      first_node: Subnet
+      second_node: ServerlessOrchestration
+      method: Backward
     - id: vf2subnet
       first_node: Subnet
       second_node: VirtualFirewall
@@ -26,6 +30,10 @@ relations:
     - id: db2vpc
       first_node: VirtualNetwork
       second_node: Database
+      method: Backward
+    - id: glue2vpc
+      first_node: VirtualNetwork
+      second_node: ServerlessOrchestration
       method: Backward
     - id: vf2vpc
       first_node: VirtualNetwork
