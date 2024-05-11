@@ -215,7 +215,7 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
     if graph_mode:
         g = graphviz.Digraph("G", directory=out_path, filename="result.dot")
         g.graph_attr['nodesep'] = '1'
-        g.graph_attr['ranksep'] = '1'
+        g.graph_attr['ranksep'] = '2'
         diag.DrawDiagram(g, anno["external_entities"])
         g.render(filename="dfd", format="png", view=False)
     else:

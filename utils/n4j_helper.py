@@ -466,7 +466,8 @@ def FindNodeRegexAnyModule(regexName, pathID):
         """
         MATCH (u:$id:resource)
         WHERE u.type =~ $regex
-        RETURN ID(u) as id;
+        RETURN ID(u) as id
+        ORDER BY degree(u)
         """,
         id = pathID,
         regex=regexName,
