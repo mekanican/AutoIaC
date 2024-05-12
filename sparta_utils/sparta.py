@@ -8,7 +8,7 @@ from subprocess import run
 logger = logging.getLogger(__name__)
 
 # CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACThreatTypeCatalog.sparta"))
-CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACNewCatalog.sparta"))
+CATALOG_PATH    = str(os.path.abspath("./sparta_utils/IACNewCatalog_v2.sparta"))
 CLI_PATH        = "./sparta_utils/sparta-cli-2022.1.1-shaded.jar"
 MODEL_PATH      = "./sparta_utils/spartamodel.ecore"
 OUT_PATH        = './output/output.sparta'
