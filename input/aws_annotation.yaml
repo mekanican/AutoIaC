@@ -122,12 +122,6 @@ processes:
         tf_name: aws_sqs_queue\w*
         compress: true
   
-  - group_name: Cache
-    annotation: CloudApplication
-    members:
-      - name: ElastiCache
-        tf_name: aws_elasticache\w*
-        compress: true
   
 boundaries:
   - group_name: VirtualNetwork
@@ -166,6 +160,17 @@ data_stores:
       - name: SSMParameter
         tf_name: aws_ssm_parameter
 
+  - group_name: Cache
+    members:
+      - name: ElastiCache
+        tf_name: aws_elasticache\w*
+        compress: true
+
+  - group_name: DataWarehouse
+    members:
+      - name: Redshift
+        tf_name: aws_redshift\w*
+        compress: true
 
   # - group_name: AuditLog
   #   members:
