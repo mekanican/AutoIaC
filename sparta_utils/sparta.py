@@ -89,7 +89,7 @@ def ThreatAnalyze(csv_path, sparta_path):
         "-i",
         sparta_path,
         "-pt",
-        "./sparta_utils/IACNewCatalog.sparta",
+        "./sparta_utils/IACNewCatalog_v2.sparta",
         "-oc", 
         csv_path
         # "result.csv"
