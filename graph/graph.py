@@ -70,8 +70,9 @@ def LoadFromFolder(filePath: str, init=True):
         ]
     }
     """
-
     # Generate connection
+    if data["edges"] is None:
+        data["edges"] = []
     for edge in data["edges"]:
         source = nodeInvMap[edge["data"]["source"]]
         target = nodeInvMap[edge["data"]["target"]]
