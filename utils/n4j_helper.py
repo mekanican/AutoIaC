@@ -488,7 +488,7 @@ def CompressV2(regexName, pathID):
         logging.info(str(_id))
         records, summary, _ = INSTANCE.execute_query(
             """
-                MATCH (u:$id:resource)-[:REF*]-(v:$id:resource)
+                MATCH (u:$id:resource)-[:REF*]->(v:$id:resource)
 
                 WHERE ID(v) = $nodeid 
                     AND ID(u) != ID(v)
@@ -518,7 +518,39 @@ def CompressV2(regexName, pathID):
             list=node_ids,
             database_="memgraph"
         )
-        logging.info(str(summary.counters))
+        records, summary, _ = INSTANCE.execute_query(
+            """
+                MATCH (u:$id:resource)<-[:REF*]-(v:$id:resource)
+
+                WHERE ID(v) = $nodeid 
+                    AND ID(u) != ID(v)
+                    AND ID(u) in $list 
+                
+                WITH u,v LIMIT 1
+
+                OPTIONAL MATCH f=(s:$id)-[:REF]->(v)
+                WHERE ID(s) != ID(u)
+
+                OPTIONAL MATCH g=(v)-[:REF]->(d:$id)
+                WHERE ID(d) != ID(u)
+
+                DETACH DELETE v
+
+                WITH collect(s) as cs, collect(d) as cd, u
+                                FOREACH (ucs in cs |
+                    MERGE for=(ucs)-[:REF]->(u)
+                )
+                FOREACH (ucd in cd |
+                    MERGE bac=(u)-[:REF]->(ucd)
+                )
+                return *;
+            """,
+            id = pathID,
+            nodeid=_id,
+            list=node_ids,
+            database_="memgraph"
+        )
+        # logging.info(str(summary.counters))
         Cleanup(pathID)   # Performance bottlleneck, but required 
     
     pass
