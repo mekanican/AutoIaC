@@ -483,22 +483,18 @@ def CompressV2(regexName, pathID):
     logger.info(f"Got {len(node_ids)} nodes in same group")
 
 
-    records, _, _ = INSTANCE.execute_query(
-        "CREATE (u:dummy) RETURN *",
-        database_="memgraph"
-    )
 
-    for _id in node_ids:
+    for _id in node_ids[:-1]:
         logging.info(str(_id))
         records, summary, _ = INSTANCE.execute_query(
             """
-                MATCH (u:$id:resource)-[:REF]-(v:$id:resource), (x:dummy)
+                MATCH (u:$id:resource)-[:REF]-(v:$id:resource)
 
                 WHERE ID(v) = $nodeid 
                     AND ID(u) != ID(v)
                     AND ID(u) in $list 
                 
-                WITH u,v,x LIMIT 1
+                WITH u,v LIMIT 1
 
                 OPTIONAL MATCH f=(s:$id)-[:REF]->(v)
                 WHERE ID(s) != ID(u)
@@ -508,11 +504,13 @@ def CompressV2(regexName, pathID):
 
                 DETACH DELETE v
 
-                WITH collect(s) as cs, collect(d) as cd, x, u
-                UNWIND (CASE cs WHEN [] then [x] else cs end) as ucs
-                UNWIND (CASE cd WHEN [] then [x] else cd end) as ucd
-                MERGE (ucs)-[:REF]->(u)
-                MERGE (u)-[:REF]->(ucd)
+                WITH collect(s) as cs, collect(d) as cd, u
+                                FOREACH (ucs in cs |
+                    MERGE for=(ucs)-[:REF]->(u)
+                )
+                FOREACH (ucd in cd |
+                    MERGE bac=(u)-[:REF]->(ucd)
+                )
                 return *;
             """,
             id = pathID,
@@ -523,15 +521,10 @@ def CompressV2(regexName, pathID):
         logging.info(str(summary.counters))
         Cleanup(pathID)   # Performance bottlleneck, but required 
     
-    records, _, _ = INSTANCE.execute_query(
-        "MATCH (u:dummy) DETACH DELETE u",
-        database_="memgraph"
-    )
-
-
     pass
 
 def Cleanup(pathID):
+    # Self loop
     records, _, _ = INSTANCE.execute_query(
         """
         MATCH (u:$id)-[rel]-(u:$id)
@@ -541,11 +534,12 @@ def Cleanup(pathID):
         database_="memgraph"
     )
 
-    records, _, _ = INSTANCE.execute_query(
-        """
-        MATCH (u:$id)-[rel]->(v:$id), (u)<-[]-(v)
-        DELETE rel
-        """,
-        id = pathID,
-        database_="memgraph"
-    )
+    # Bidirectional
+    # records, _, _ = INSTANCE.execute_query(
+    #     """
+    #     MATCH (u:$id)-[rel]->(v:$id), (u)<-[]-(v)
+    #     DELETE rel
+    #     """,
+    #     id = pathID,
+    #     database_="memgraph"
+    # )

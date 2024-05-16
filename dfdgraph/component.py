@@ -28,7 +28,7 @@ class DFDNode:
         for df in self.dataflow:
             df.MakeDirected(g)
     def AddEdge(self, toNode: "DFDNode", label = "", refBound = None):
-        if (self, toNode) in DF_MAP:
+        if (self, toNode) in DF_MAP or (toNode, self) in DF_MAP:
             return
         else:
             DF_MAP.add((self, toNode))
