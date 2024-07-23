@@ -4,7 +4,24 @@ Automated App to convert IaCs scripts to DFD
 ## Sample architecture:
 ![](./architecture/main.png)
 
-## Step
+## Usage
+### Docker install
+
+1. `docker compose up`
+2. Analyze with this tool
+
+- `docker exec autoiac python main.py <terraform_project_path> -o <folder_path_to_store_dfd_dot> `
+- `-o ..` part is optional, default to current directory output folder
+- `--reinit=False` to disable project reinit (for second run)
+- `-a`: specify path to annotation (default to `./input/aws_annotation.yaml`)
+- `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)
+- `--rule_path`: specify path to rule of relation (default to `./input/aws_rule.yaml`)
+- `--graph_mode=True` to export graph instead of sparta
+- `-f`: specify path to semgrep rule for depends_on (default to `./input/depend_on_rule.yaml`) 
+- `--rm_depend_on=False` to disable "depends_on" removal
+
+### Manual install
+
 0. Run `memgraph` with: `docker compose -f ./memgraph-compose.yaml up`
 1. Create new python virtualenv (venv, pipenv, ...)
 2. Install dependencies

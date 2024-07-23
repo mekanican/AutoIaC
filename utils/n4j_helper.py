@@ -6,7 +6,7 @@ import os
 logger = logging.getLogger(__name__)
 
 # Define correct URI and AUTH arguments (no AUTH by default)
-URI = "bolt://localhost:7687"
+URI = os.getenv("MEMGRAPH_URI", "bolt://localhost:7687")
 AUTH = ("", "")
 
 def Initialize():

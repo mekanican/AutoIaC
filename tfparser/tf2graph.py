@@ -47,20 +47,27 @@ def InitTerraform(folderPath, isTofu=True):
     #         "-chdir=%s"%folderPath,
     #         "init"
     # ]
-    command = [
-        "docker",
-        "run",
-        "--platform",
-        "linux/amd64",
-        "--rm",
-        "-a",
-        "stdout",
-        "-v",
-        str(os.path.abspath(folderPath)) + ":/app",
-        "hashicorp/terraform:1.8.0-rc2",
-        "-chdir=/app",
-        "init"
-    ]
+    if os.getenv("DOCKER_ENV") == "1":
+        command = [
+            "terraform",
+            f"-chdir={str(os.path.abspath(folderPath))}",
+            "init"
+        ]
+    else:
+        command = [
+            "docker",
+            "run",
+            "--platform",
+            "linux/amd64",
+            "--rm",
+            "-a",
+            "stdout",
+            "-v",
+            str(os.path.abspath(folderPath)) + ":/app",
+            "hashicorp/terraform:1.8.0-rc2",
+            "-chdir=/app",
+            "init"
+        ]
 
 
     logger.info("Running %s" % ' '.join(command)) 
@@ -74,21 +81,29 @@ def GenerateDotFile(folderPath: str, isTofu=True) -> str:
     #         "graph",
     #         "-type=plan"
     # ]
-    command = [
-        "docker",
-        "run",
-        "--platform",
-        "linux/amd64",
-        "--rm",
-        "-a",
-        "stdout",
-        "-v",
-        str(os.path.abspath(folderPath)) + ":/app",
-        "hashicorp/terraform:1.8.0-rc2",
-        "-chdir=/app",
-        "graph",
-        "-type=plan"
-    ]
+    if os.getenv("DOCKER_ENV") == "1":
+        command = [
+            "terraform",
+            f"-chdir={str(os.path.abspath(folderPath))}",
+            "graph",
+            "-type=plan",
+        ]
+    else:
+        command = [
+            "docker",
+            "run",
+            "--platform",
+            "linux/amd64",
+            "--rm",
+            "-a",
+            "stdout",
+            "-v",
+            str(os.path.abspath(folderPath)) + ":/app",
+            "hashicorp/terraform:1.8.0-rc2",
+            "-chdir=/app",
+            "graph",
+            "-type=plan"
+        ]
 
     logger.info("Running %s" % ' '.join(command)) 
     result = run(command, capture_output=True, check=True)
@@ -108,21 +123,29 @@ def GenerateJSON(dotPath: str) -> str:
     #         dotPath,
     #         "--output-type=cyto-json"
     # ]
-    command = [
-        "docker",
-        "run",
-        "--platform",
-        "linux/amd64",
-        "--rm",
-        "-a",
-        "stdout",
-        "-v",
-        str(os.path.abspath(dotPath))+":/app/d.dot",
-        "ghcr.io/pcasteran/terraform-graph-beautifier:0.3.4-linux",
-        "-input",
-        "/app/d.dot",
-        "--output-type=cyto-json"
-    ]
+    if os.getenv("DOCKER_ENV") == "1":
+        command = [
+            "terraform-graph-beautifier",
+            "-input",
+            dotPath,
+            "--output-type=cyto-json"
+        ]
+    else:
+        command = [
+            "docker",
+            "run",
+            "--platform",
+            "linux/amd64",
+            "--rm",
+            "-a",
+            "stdout",
+            "-v",
+            str(os.path.abspath(dotPath))+":/app/d.dot",
+            "ghcr.io/pcasteran/terraform-graph-beautifier:0.3.4-linux",
+            "-input",
+            "/app/d.dot",
+            "--output-type=cyto-json"
+        ]
 
     logger.info("Running %s" % ' '.join(command)) 
     result = run(command, capture_output=True, check=True)
