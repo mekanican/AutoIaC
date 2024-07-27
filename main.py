@@ -21,7 +21,7 @@ def GenerateDockerPath(folderPath: str) -> str:
     if '\\' in folderPath:
         folderPath = folderPath.replace('\\', '/')
     pathComponents = folderPath.split("/")
-    for i in range(len(pathComponents), 0, -1):
+    for i in range(len(pathComponents) - 1, -1, -1):
         currentPath = "/".join(pathComponents[i:])
         dockerPath = os.path.join("/project", currentPath)
         if os.path.exists(dockerPath):
