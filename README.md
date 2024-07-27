@@ -7,11 +7,11 @@ Automated App to convert IaCs scripts to DFD
 ## Usage
 ### Docker install
 
-1. `docker compose up`
-2. Analyze with this tool
+1. Start Memgraph container with `docker compose up -d`
+2. Build AutoIAC tool with `docker build . -t autoiac`
+3. Analyze with this tool
 
-- `docker exec autoiac python main.py <terraform_project_path> -o <folder_path_to_store_dfd_dot> `
-- `-o ..` part is optional, default to current directory output folder
+- `docker run --rm --network host <project_abs_path>:/project -v <output_abs_path>:/output autoiac <terraform_project_path>`
 - `--reinit=False` to disable project reinit (for second run)
 - `-a`: specify path to annotation (default to `./input/aws_annotation.yaml`)
 - `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)

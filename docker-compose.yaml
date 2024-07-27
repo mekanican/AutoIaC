@@ -7,14 +7,4 @@ services:
       - "7444:7444"
     command: ["--log-level=TRACE"]
 
-  autoiac:
-    build: .
-    container_name: autoiac
-    depends_on:
-      - memgraph
-    volumes:
-      - .:/app
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DOCKER_ENV=1
-      - MEMGRAPH_URI=bolt://memgraph:7687
+

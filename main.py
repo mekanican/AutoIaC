@@ -4,6 +4,7 @@ import fire
 import logging
 import graphviz
 import re
+import os
 
 from dfdgraph import DataStore
 from dfdgraph.component import COMPONENT_ID_NODE
@@ -16,8 +17,21 @@ from utils.yaml_importer import print_object, read_config
 
 logging.basicConfig(level = logging.INFO)
 
+def GenerateDockerPath(folderPath: str) -> str:
+    if '\\' in folderPath:
+        folderPath = folderPath.replace('\\', '/')
+    pathComponents = folderPath.split("/")
+    for i in range(len(pathComponents)):
+        currentPath = "/".join(pathComponents[i:])
+        dockerPath = os.path.join("/project", currentPath)
+        if os.path.exists(dockerPath):
+            return dockerPath
+    return folderPath
 
 def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aws_rule.yaml", sem_rule="./input/semgrep_rule.yaml", fix_rule="./input/depend_on_rule.yaml", out_path="./output", global_tb_name="Cloud", reinit=True, graph_mode=False, rm_depend_on=True):
+    if os.getenv("DOCKER_ENV") == "1":
+        in_path = GenerateDockerPath(in_path)
+        out_path = "/output"
     print(f"Reading {in_path}, Writing to {out_path}")
 
     anno = read_config(anno_path)
