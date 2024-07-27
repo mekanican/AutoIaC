@@ -21,7 +21,7 @@ def GenerateDockerPath(folderPath: str) -> str:
     if '\\' in folderPath:
         folderPath = folderPath.replace('\\', '/')
     pathComponents = folderPath.split("/")
-    for i in range(len(pathComponents)):
+    for i in range(len(pathComponents), 0, -1):
         currentPath = "/".join(pathComponents[i:])
         dockerPath = os.path.join("/project", currentPath)
         if os.path.exists(dockerPath):
@@ -233,6 +233,8 @@ def main(in_path, anno_path="./input/aws_annotation.yaml", rule_path="./input/aw
         diag.DrawDiagram(g, anno["external_entities"])
         g.render(filename="dfd", format="png", view=False)
     else:
+        if os.getenv("DOCKER_ENV") == "1":
+            out_path = "../output"
         diag.ExportSparta(out_path, anno["external_entities"])
 
     
