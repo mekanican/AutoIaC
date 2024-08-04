@@ -16,7 +16,7 @@ def Initialize():
         client.verify_connectivity()
         return client
     except:
-        print("Cannot connect to server at %s" % URI)
+        logging.error("Cannot connect to server at %s" % URI)
         exit(1)
         
 

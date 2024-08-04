@@ -1,9 +1,13 @@
 import graphviz
+import logging
 from typing import List, Mapping
 
 from sparta_utils.sparta import SpartaComponent
 from utils.random_tmp import get_random_id
 from .component import DFDNode
+
+
+logger = logging.getLogger(__name__)
 
 BOUNDARY_ID_NODE: Mapping[str, "TrustBoundary"] = {}
 
@@ -33,7 +37,7 @@ class TrustBoundary:
                 node.DrawNode(sg)
                 # node.DrawEdge(sg)
             for boundary in self.innerBoundaries:
-                print(f"In {self.name}: {boundary.name}")
+                logger.info(f"In {self.name}: {boundary.name}")
                 boundary.DrawBoundNode(sg)
     def DrawBoundEdge(self, g:graphviz.Digraph):
         for node in self.nodes:

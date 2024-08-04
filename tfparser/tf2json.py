@@ -18,7 +18,7 @@ def clone_temp(url: str) -> str:
     return tempLoc
 
 
-
+# Unused
 def parse_project_JSON(folderPath: str, allBlock: dict = {}):
     """Parse Project to single JSON file for augmented information.
 
@@ -55,7 +55,6 @@ def parse_project_JSON(folderPath: str, allBlock: dict = {}):
 
     for mod in allBlock["module"]:
         k, v = next(iter(mod.items())) 
-        # print("[***]",k, v)
         logger.info("Found module " + k + " at " + v["source"])
         # Move module to analyzed to ignore further analyze
         if "analyzed_module" not in allBlock:

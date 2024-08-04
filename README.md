@@ -11,14 +11,22 @@ Automated App to convert IaCs scripts to DFD
 2. Build AutoIAC tool with `docker build . -t autoiac`
 3. Analyze with this tool
 
-- `docker run --rm --network host <project_abs_path>:/project -v <output_abs_path>:/output autoiac <terraform_project_path>`
+- `docker run --rm --network host -v <project_abs_path>:/project -v <output_abs_path>:/output autoiac <terraform_project_path>`
 - `--reinit=False` to disable project reinit (for second run)
 - `-a`: specify path to annotation (default to `./input/aws_annotation.yaml`)
 - `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)
 - `--rule_path`: specify path to rule of relation (default to `./input/aws_rule.yaml`)
 - `--graph_mode=True` to export graph instead of sparta
-- `-f`: specify path to semgrep rule for depends_on (default to `./input/depend_on_rule.yaml`) 
-- `--rm_depend_on=False` to disable "depends_on" removal
+- `-v` for verbose output
+
+For example, on host:
+- Terraform project at: /tmp/test/terraform
+- Main terraform file at: /tmp/test/terraform/subfolder/main.tf
+- Designated output folder at: /tmp/output
+
+```
+docker run --rm --network host -v /tmp/test/terraform:/project -v /tmp/output:/output autoiac subfolder/ <Other args>
+```
 
 ### Manual install
 
@@ -34,8 +42,6 @@ Automated App to convert IaCs scripts to DFD
 - `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)
 - `--rule_path`: specify path to rule of relation (default to `./input/aws_rule.yaml`)
 - `--graph_mode=True` to export graph instead of sparta
-- `-f`: specify path to semgrep rule for depends_on (default to `./input/depend_on_rule.yaml`) 
-- `--rm_depend_on=False` to disable "depends_on" removal
 
 ---
 ## Annotation structure

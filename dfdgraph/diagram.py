@@ -1,10 +1,14 @@
 import graphviz
+import logging
 from typing import List
 
 from dfdgraph.dataflow import GLOBAL_DF_SP
 from sparta_utils.sparta import AddElement, Export, ThreatAnalyze
 from .component import DFDNode, ExternalEntity
 from .trustboundary import TrustBoundary
+
+
+logger = logging.getLogger(__name__)
 
 class Diagram:
     def __init__(self):
@@ -45,7 +49,7 @@ class Diagram:
         for ee in ee_list:
             ee.DrawNode(g)
         for bound in self.boundaries:
-            print(f"In diag: {bound.name}")
+            logger.info(f"In diag: {bound.name}")
             bound.DrawBoundNode(g)
 
         for ee in ee_list:
