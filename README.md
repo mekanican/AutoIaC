@@ -2,7 +2,7 @@
 Automated App to convert IaCs scripts to DFD
 
 ## Sample architecture:
-![](./architecture/main.png)
+![](./architecture/workflow4.png)
 
 ## Usage
 ### Docker install
@@ -42,6 +42,18 @@ docker run --rm --network host -v /tmp/test/terraform:/project -v /tmp/output:/o
 - `-s`: specify path to semgrep rule for public boundaries identification (default to `./input/semgrep_rule.yaml`)
 - `--rule_path`: specify path to rule of relation (default to `./input/aws_rule.yaml`)
 - `--graph_mode=True` to export graph instead of sparta
+
+## Sample output
+![](./architecture/autoiac_result.png)
+
+| Threat Type                                               | Threatened                         |
+|-----------------------------------------------------------|------------------------------------|
+| Spoofing: Broken Authentication                           | LoadBalancer (ALB) - km_lb         |
+| Tampering: Malware From Cloud Application                 | User                               |
+| Repudiation: Attacking the Logs                           | FileStorage (S3) - km_blob_storage |
+| Information Disclosure: Data Breach By Cloud Application  | LoadBalancer (ALB) - km_lb         |
+| Denial of Service: Denial of Service against a Data Store | Database (RDS) - km_db             |
+| Elevation of Privilege: Broken Access Control             | LoadBalancer (ALB) - km_lb         |
 
 ---
 ## Annotation structure
